@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<batis-mapper binding="user">
+
+    <update id="insert">
+        insert into user(`name`) values (?)
+    </update>
+
+    <update id="delete">
+        delete from user where id = ?
+    </update>
+
+    <update id="update">
+        update user as u set u.`name` = ? where u.`id` = ?
+    </update>
+
+    <select id="selectSimple">
+        select now() as t
+    </select>
+
+    <select id="selectStruct">
+        select u.id as id, u.name as name from user as u
+    </select>
+
+</batis-mapper>

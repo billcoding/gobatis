@@ -1,0 +1,38 @@
+package gobatis
+
+// A xml mapper demo file
+//
+//
+//<?xml version="1.0" encoding="UTF-8"?>
+//<batis-mapper binding="user">
+//    <update id="update">
+//        update 1
+//    </update>
+//    <select id="select">
+//        select 1
+//    </select>
+//</batis-mapper>
+
+import "encoding/xml"
+
+//Define mapper node struct
+type mapperNode struct {
+	XMLName           xml.Name           `xml:"batis-mapper"`
+	Binding           string             `xml:"binding,attr"`
+	MapperUpdateNodes []mapperUpdateNode `xml:"update"`
+	MapperSelectNodes []mapperSelectNode `xml:"select"`
+}
+
+//Define update mapper node struct
+type mapperUpdateNode struct {
+	XMLName xml.Name `xml:"update"`
+	Id      string   `xml:"id,attr"`
+	Text    string   `xml:",innerxml"`
+}
+
+//Define select mapperNode struct
+type mapperSelectNode struct {
+	XMLName xml.Name `xml:"select"`
+	Id      string   `xml:"id,attr"`
+	Text    string   `xml:",innerxml"`
+}

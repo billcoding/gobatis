@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<batis-mapper binding="user2">
+
+    <select id="query">
+        select * from user as u where 1 = 1
+        {{ if ne .id "" }}
+            and u.id = {{ .id }}
+        {{ end }}
+        {{ if ne .name "" }}
+            and u.name = '{{ .name }}'
+        {{ end }}
+    </select>
+
+    <update id="insert">
+       insert into user(name) values
+        {{ range $index, $element := . }}{{ if gt $index 0 }},{{ end }} ('{{$element.Name}}'){{ end }}
+    </update>
+
+</batis-mapper>
