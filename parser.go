@@ -36,8 +36,8 @@ func (b *Batis) parseMappers() *Batis {
 //Prepare mapper
 func (b *Batis) prepareMappers() {
 	for binding, node := range b.mapperNodes {
-		updateMappers := prepareUpdateMappers(node.MapperUpdateNodes)
-		selectMappers := prepareSelectMappers(node.MapperSelectNodes)
+		updateMappers := prepareUpdateMappers(binding, node.MapperUpdateNodes)
+		selectMappers := prepareSelectMappers(binding, node.MapperSelectNodes)
 		if len(updateMappers) <= 0 && len(selectMappers) <= 0 {
 			continue
 		}
@@ -49,7 +49,7 @@ func (b *Batis) prepareMappers() {
 	}
 }
 
-func prepareUpdateMappers(mapperUpdateNodes []mapperUpdateNode) map[string]updateMapper {
+func prepareUpdateMappers(binding string, mapperUpdateNodes []mapperUpdateNode) map[string]updateMapper {
 	updateMapperMap := make(map[string]updateMapper, 0)
 	if mapperUpdateNodes != nil {
 		for _, node := range mapperUpdateNodes {
@@ -60,6 +60,7 @@ func prepareUpdateMappers(mapperUpdateNodes []mapperUpdateNode) map[string]updat
 				continue
 			}
 			updateMapperMap[id] = updateMapper{
+				binding:     binding,
 				id:          id,
 				originalSql: sql,
 				sql:         sql,
@@ -69,7 +70,7 @@ func prepareUpdateMappers(mapperUpdateNodes []mapperUpdateNode) map[string]updat
 	return updateMapperMap
 }
 
-func prepareSelectMappers(mapperSelectNodes []mapperSelectNode) map[string]selectMapper {
+func prepareSelectMappers(binding string, mapperSelectNodes []mapperSelectNode) map[string]selectMapper {
 	selectMapperMap := make(map[string]selectMapper, 0)
 	if mapperSelectNodes != nil {
 		for _, node := range mapperSelectNodes {
@@ -80,6 +81,7 @@ func prepareSelectMappers(mapperSelectNodes []mapperSelectNode) map[string]selec
 				continue
 			}
 			selectMapperMap[id] = selectMapper{
+				binding:     binding,
 				id:          id,
 				originalSql: sql,
 				sql:         sql,

@@ -8,12 +8,6 @@ type mapper struct {
 	selectMappers map[string]selectMapper //select mappers
 }
 
-//Define txMapper struct
-type txMapper struct {
-	tx     *Tx
-	mapper mapper
-}
-
 //Get select mapper
 func (mapper *mapper) Select(id string) *selectMapper {
 	selectMapper, have := mapper.selectMappers[id]
@@ -47,25 +41,6 @@ func (mapper *txMapper) Select(id string) *selectMapper {
 	return selectMapper
 }
 
-//Get update mapper
-func (mapper *txMapper) Update(id string) *updateMapper {
-	updateMapper := mapper.mapper.Update(id)
-	if updateMapper != nil {
-		updateMapper.tx = mapper.tx
-	}
-	return updateMapper
-}
-
-//Get update mapper
-func (mapper *txMapper) Commit() error {
-	return mapper.tx.commit()
-}
-
-//Get update mapper
-func (mapper *txMapper) Rollback() error {
-	return mapper.tx.rollback()
-}
-
 //Get mapper
 func (b *Batis) Mapper(binding string) *mapper {
 	mapper, have := b.mappers[binding]
@@ -91,20 +66,6 @@ func (b *Batis) Mapper(binding string) *mapper {
 	return &mapper
 }
 
-//Get txMapper
-func (b *Batis) TxMapper(binding string) *txMapper {
-	mapper := b.Mapper(binding)
-	db := mapper.ds.db.db
-	tx := mapper.ds.db.Begin().tx
-	return &txMapper{
-		tx: &Tx{
-			db: db,
-			tx: tx,
-		},
-		mapper: *mapper,
-	}
-}
-
 //Set mapper path
 func (b *Batis) MapperPaths(mapperPaths ...string) *Batis {
 	b.mapperPaths = mapperPaths
@@ -113,13 +74,7 @@ func (b *Batis) MapperPaths(mapperPaths ...string) *Batis {
 
 //Parse mapper paths
 func (b *Batis) parseMapperPaths() *Batis {
-	//d, _ := os.Executable()
-	//dir := filepath.Dir(d)
-	//fix path
 	for _, mapperPath := range b.mapperPaths {
-		//if strings.HasPrefix(mapperPath, "./") {
-		//	mapperPath = strings.Replace(mapperPath, "./", dir+string(filepath.Separator), 1)
-		//}
 		b.parsedMapperPaths = append(b.parsedMapperPaths, mapperPath)
 	}
 	return b

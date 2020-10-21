@@ -29,7 +29,7 @@ func (log *log) log(t, message string, args ...interface{}) {
 	if args != nil {
 		str = fmt.Sprintf(message, args...)
 	}
-	now := time.Now().Format("2006/1/2 15:04:05.000")
+	now := time.Now().Format("2006/01/02 15:04:05.000")
 	s := fmt.Sprintf("[%s][GOBATIS][%s] %s", now, t, str)
 	fmt.Println(s)
 }

@@ -2,15 +2,12 @@ package gobatis
 
 import (
 	"database/sql"
-	"errors"
 	"io/ioutil"
 	"path/filepath"
 	"reflect"
 	"regexp"
 	"strings"
 )
-
-var namedParamNotSetErr = errors.New("named param not set fully")
 
 //Get mapperNode files
 func getMapperFiles(dir ...string) []string {
@@ -50,7 +47,7 @@ func replaceNamedParams(sql string, params ...*NamedParam) string {
 	return replacedSql
 }
 
-//return struct field name-column mapping
+//Return struct field name-column mapping
 func getFieldMap(structPtr interface{}) map[string]string {
 	reflectType := reflect.TypeOf(structPtr).Elem()
 	fieldNum := reflectType.NumField()
@@ -66,7 +63,7 @@ func getFieldMap(structPtr interface{}) map[string]string {
 	return fieldMap
 }
 
-//scan a struct from rows
+//Scan a struct from rows
 func scanStruct(rows *sql.Rows, structPtr interface{}) []interface{} {
 	//must be kind of Ptr
 	if reflect.TypeOf(structPtr).Kind() != reflect.Ptr {
@@ -100,7 +97,6 @@ func scanStruct(rows *sql.Rows, structPtr interface{}) []interface{} {
 				fieldAddrs[i] = &unused
 			}
 		}
-
 		rows.Scan(fieldAddrs...)
 		list = append(list, nrv.Addr().Interface())
 	}
@@ -110,74 +106,78 @@ func scanStruct(rows *sql.Rows, structPtr interface{}) []interface{} {
 	return list
 }
 
-func queryByTx(tx *Tx, sql string, args ...interface{}) *sql.Rows {
+//Query on tx
+func queryByTx(m *selectMapper, tx *Tx, sql string, args ...interface{}) (*sql.Rows, error) {
 	if args != nil && len(args) > 0 {
 		rows, err := tx.tx.Query(sql, args...)
 		if err != nil {
-			batis.LogFatal("queryByTx error : %v", err)
-			return nil
+			batis.LogFatal("binding[%s] update[%s] queryByTx error : %v", m.binding, m.id, err)
+			return nil, err
 		}
-		return rows
+		return rows, nil
 	} else {
 		rows, err := tx.tx.Query(sql)
 		if err != nil {
-			batis.LogFatal("queryByTx error : %v", err)
-			return nil
+			batis.LogFatal("binding[%s] update[%s] queryByTx error : %v", m.binding, m.id, err)
+			return nil, err
 		}
-		return rows
+		return rows, nil
 	}
 }
 
-func queryByDB(db *DB, sql string, args ...interface{}) *sql.Rows {
+//Query on db
+func queryByDB(m *selectMapper, db *DB, sql string, args ...interface{}) (*sql.Rows, error) {
 	if args != nil && len(args) > 0 {
 		rows, err := db.db.Query(sql, args...)
 		if err != nil {
-			batis.LogFatal("queryByDB error : %v", err)
-			return nil
+			batis.LogFatal("binding[%s] update[%s] queryByDB error : %v", m.binding, m.id, err)
+			return nil, err
 		}
-		return rows
+		return rows, err
 	} else {
 		rows, err := db.db.Query(sql)
 		if err != nil {
-			batis.LogFatal("queryByDB error : %v", err)
-			return nil
+			batis.LogFatal("binding[%s] update[%s] queryByDB error : %v", m.binding, m.id, err)
+			return nil, err
 		}
-		return rows
+		return rows, err
 	}
 }
 
-func updateByTx(tx *Tx, sql string, args ...interface{}) sql.Result {
+//Update on tx
+func updateByTx(m *updateMapper, tx *Tx, sql string, args ...interface{}) (sql.Result, error) {
 	if args != nil && len(args) > 0 {
 		result, err := tx.tx.Exec(sql, args...)
 		if err != nil {
-			batis.LogFatal("updateByTx error : %v", err)
-			return nil
+			batis.LogFatal("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
+			return nil, err
 		}
-		return result
+		return result, nil
 	} else {
 		result, err := tx.tx.Exec(sql)
 		if err != nil {
-			batis.LogFatal("updateByTx error : %v", err)
-			return nil
+			batis.LogFatal("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
+			return nil, err
 		}
-		return result
+		return result, nil
 	}
 }
 
-func updateByDB(db *DB, sql string, args ...interface{}) sql.Result {
+//Update on db
+func updateByDB(m *updateMapper, db *DB, sql string, args ...interface{}) (sql.Result, error) {
 	if args != nil && len(args) > 0 {
 		result, err := db.db.Exec(sql, args...)
 		if err != nil {
-			batis.LogFatal("updateByDB error : %v", err)
-			return nil
+			batis.LogFatal("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
+			return nil, err
 		}
-		return result
+		return result, nil
 	} else {
 		result, err := db.db.Exec(sql)
 		if err != nil {
-			batis.LogFatal("updateByDB error : %v", err)
-			return nil
+			batis.LogFatal("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
+			return nil, err
 		}
-		return result
+		return result, nil
 	}
 }

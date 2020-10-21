@@ -8,6 +8,7 @@ import (
 
 //Define update mapper struct
 type updateMapper struct {
+	binding      string //binding key
 	id           string //id
 	tx           *Tx    //sql tx
 	db           *DB    //sql db
@@ -69,23 +70,25 @@ func (m *updateMapper) ExecWithParamsArgs(params []*NamedParam, args ...interfac
 	m.sql = replaceNamedParams(m.sql, params...)
 
 	if m.tx != nil {
-		result = updateByTx(m.tx, m.sql, args...)
+		result, err = updateByTx(m, m.tx, m.sql, args...)
 	} else {
-		result = updateByDB(m.db, m.sql, args...)
+		result, err = updateByDB(m, m.db, m.sql, args...)
 	}
+
 	if batis.showSql {
-		batis.LogInfo("exec [%v] : sql(%v), args(%v)", m.id, m.sql, args)
+		batis.LogInfo("binding[%s] update[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, args)
 	}
+
 	if err != nil {
-		batis.LogFatal("exec sql error : %v", err)
 		return err
 	}
-	ra, errRa := result.RowsAffected()
-	li, _ := result.LastInsertId()
-	m.affectedRows = ra
-	m.insertedId = li
-	if errRa != nil {
-		return errRa
+
+	if result != nil {
+		ra, _ := result.RowsAffected()
+		li, _ := result.LastInsertId()
+		m.affectedRows = ra
+		m.insertedId = li
 	}
-	return err
+
+	return nil
 }

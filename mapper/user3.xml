@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<batis-mapper binding="user3">
+
+    <select id="select">
+        select nowaaaa()
+    </select>
+
+    <update id="update">
+     update
+    </update>
+
+</batis-mapper>

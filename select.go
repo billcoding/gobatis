@@ -8,6 +8,7 @@ import (
 
 //Define select mapper struct
 type selectMapper struct {
+	binding     string //binding key
 	id          string //id
 	tx          *Tx    //tx
 	db          *DB    //db
@@ -80,15 +81,23 @@ func (m *selectMapper) ExecWithParams(params ...*NamedParam) *selectCall {
 //Select exec with args and named params
 func (m *selectMapper) ExecWithParamsArgs(params []*NamedParam, args ...interface{}) *selectCall {
 	var rows *sql.Rows
+	var err error
+
 	//replace namedParam
 	m.sql = replaceNamedParams(m.sql, params...)
 	if m.tx != nil {
-		rows = queryByTx(m.tx, m.sql, args...)
+		rows, err = queryByTx(m, m.tx, m.sql, args...)
 	} else {
-		rows = queryByDB(m.db, m.sql, args...)
+		rows, err = queryByDB(m, m.db, m.sql, args...)
 	}
+
 	if batis.showSql {
-		batis.LogInfo("exec [%v] : sql(%v) , args(%v)", m.id, m.sql, args)
+		batis.LogInfo("binding[%s] select[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, args)
 	}
+
+	if err != nil {
+		return nil
+	}
+
 	return &selectCall{rows: rows}
 }
