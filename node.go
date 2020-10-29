@@ -27,12 +27,12 @@ type mapperNode struct {
 type mapperUpdateNode struct {
 	XMLName xml.Name `xml:"update"`
 	Id      string   `xml:"id,attr"`
-	Text    string   `xml:",innerxml"`
+	Text    string   `xml:",cdata"`
 }
 
 //Define select mapperNode struct
 type mapperSelectNode struct {
 	XMLName xml.Name `xml:"select"`
 	Id      string   `xml:"id,attr"`
-	Text    string   `xml:",innerxml"`
+	Text    string   `xml:",cdata"`
 }

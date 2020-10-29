@@ -13,8 +13,9 @@
         update user as u set u.`name` = ? where u.`id` = ?
     </update>
 
-    <select id="selectSimple">
-        select now() as t
+    <select id="selectSimple"><![CDATA[
+        select concat(now(),'<','>','=') as t
+    ]]>
     </select>
 
     <select id="selectStruct">
