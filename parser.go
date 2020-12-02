@@ -10,22 +10,22 @@ func (b *Batis) parseMappers() *Batis {
 	for _, file := range b.mapperFiles {
 		bytes, err := ioutil.ReadFile(file)
 		if err != nil {
-			b.LogFatal("error : %v", err)
+			b.Error("error : %v", err)
 			continue
 		}
 		mapperNode := mapperNode{}
-		b.LogInfo("parsing mapper file : %v", file)
+		b.Info("parsing mapper file : %v", file)
 		err = xml.Unmarshal(bytes, &mapperNode)
 		if err != nil {
-			b.log.fatal("error : %v", err)
+			b.Error("error : %v", err)
 			continue
 		}
 		if mapperNode.Binding == "" {
-			b.LogFatal("mapper binding muse be provided in `%v`", file)
+			b.Error("mapper binding muse be provided in `%v`", file)
 			continue
 		}
 		if _, have := b.mapperNodes[mapperNode.Binding]; have {
-			b.LogFatal("mapper binding is exists in `%v`", file)
+			b.Error("mapper binding is exists in `%v`", file)
 			continue
 		}
 		b.mapperNodes[mapperNode.Binding] = mapperNode
@@ -56,7 +56,7 @@ func prepareUpdateMappers(binding string, mapperUpdateNodes []mapperUpdateNode) 
 			id := node.Id
 			sql := node.Text
 			if sql == "" {
-				batis.LogWarn("node sql is empty : %v", id)
+				batis.Warn("node sql is empty : %v", id)
 				continue
 			}
 			updateMapperMap[id] = updateMapper{
@@ -77,7 +77,7 @@ func prepareSelectMappers(binding string, mapperSelectNodes []mapperSelectNode) 
 			id := node.Id
 			sql := node.Text
 			if sql == "" {
-				batis.LogWarn("node sql is empty : %v", id)
+				batis.Warn("node sql is empty : %v", id)
 				continue
 			}
 			selectMapperMap[id] = selectMapper{

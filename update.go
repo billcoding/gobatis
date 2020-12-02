@@ -44,7 +44,7 @@ func (m *updateMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMa
 	var builder strings.Builder
 	err := t.Execute(&builder, data)
 	if err != nil {
-		batis.LogFatal(err.Error())
+		batis.Error(err.Error())
 		return m
 	}
 	m.sql = builder.String()
@@ -76,7 +76,7 @@ func (m *updateMapper) ExecWithParamsArgs(params []*NamedParam, args ...interfac
 	}
 
 	if batis.showSql {
-		batis.LogInfo("binding[%s] update[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, args)
+		batis.Info("binding[%s] update[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, args)
 	}
 
 	if err != nil {

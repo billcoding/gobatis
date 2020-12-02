@@ -21,7 +21,7 @@ CREATE TABLE `user` (
 
 */
 
-const dsn = "root:123@tcp(192.168.1.8:3306)/test"
+const dsn = "root:123@tcp(127.0.0.1:3306)/test"
 
 func TestInsert(t *testing.T) {
 	var batis = Default().Init().RegisterDS("master", dsn)

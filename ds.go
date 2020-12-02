@@ -10,10 +10,10 @@ type ds struct {
 func (mapper *mapper) SelectDS(dsName string) *mapper {
 	ds, have := batis.dss[dsName]
 	if !have {
-		batis.LogFatal("unregistered ds : %v", dsName)
+		batis.Error("unregistered ds : %v", dsName)
 		return nil
 	}
-	batis.LogInfo("using ds : %v", dsName)
+	batis.Info("using ds : %v", dsName)
 	mapper.ds = *ds
 	return mapper
 }

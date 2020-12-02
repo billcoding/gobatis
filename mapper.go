@@ -12,7 +12,7 @@ type mapper struct {
 func (mapper *mapper) Select(id string) *selectMapper {
 	selectMapper, have := mapper.selectMappers[id]
 	if !have {
-		batis.LogFatal("no select node : %v", id)
+		batis.Error("no select node : %v", id)
 		return nil
 	}
 	//set db
@@ -24,7 +24,7 @@ func (mapper *mapper) Select(id string) *selectMapper {
 func (mapper *mapper) Update(id string) *updateMapper {
 	updateMapper, have := mapper.updateMappers[id]
 	if !have {
-		batis.LogFatal("no update node : %v", id)
+		batis.Error("no update node : %v", id)
 		return nil
 	}
 	//set db
@@ -45,7 +45,7 @@ func (mapper *txMapper) Select(id string) *selectMapper {
 func (b *Batis) Mapper(binding string) *mapper {
 	mapper, have := b.mappers[binding]
 	if !have {
-		b.LogFatal("no binding : %v", binding)
+		b.Error("no binding : %v", binding)
 		return nil
 	}
 

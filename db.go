@@ -21,7 +21,7 @@ type DBConfig struct {
 func (db *DB) Begin() *Tx {
 	tx, err := db.db.Begin()
 	if err != nil {
-		batis.LogFatal("tx begin err : %v", err)
+		batis.Error("tx begin err : %v", err)
 		return nil
 	}
 	return &Tx{

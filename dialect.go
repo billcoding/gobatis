@@ -12,6 +12,6 @@ const (
 //Choose dialect
 func (b *Batis) Choose(dialect Dialect) *Batis {
 	b.dialect = dialect
-	b.LogInfo("Choose dialect[%s]", dialect)
+	b.Info("Choose dialect[%s]", dialect)
 	return b
 }

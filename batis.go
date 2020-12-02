@@ -2,6 +2,8 @@ package gobatis
 
 import (
 	"database/sql"
+	"log"
+	"os"
 	"sync"
 )
 
@@ -10,7 +12,8 @@ var batis *Batis
 //Define batis struct
 type Batis struct {
 	mutex             sync.Mutex            //mutex
-	log               log                   //log
+	olog              *log.Logger           //out log
+	elog              *log.Logger           //err log
 	showSql           bool                  //show sql
 	dialect           Dialect               //choose db dialect
 	dss               map[string]*ds        //multiple datasource
@@ -26,7 +29,8 @@ type Batis struct {
 func newBatis() *Batis {
 	return &Batis{
 		mutex:   sync.Mutex{},
-		log:     log{},
+		olog:    log.New(os.Stdout, "[GOBATIS]", log.Flags()),
+		elog:    log.New(os.Stderr, "[GOBATIS]", log.Flags()),
 		showSql: false,
 		dialect: MySQL,
 		dss:     map[string]*ds{},
@@ -115,7 +119,7 @@ func (b *Batis) scanMapper() *Batis {
 	defer b.mutex.Unlock()
 	//collect mapperNode files
 	for _, mapperPath := range b.parsedMapperPaths {
-		b.LogInfo("collect mapper files : %v", mapperPath)
+		b.Info("collect mapper files : %v", mapperPath)
 		for _, mf := range getMapperFiles(mapperPath) {
 			b.mapperFiles = append(b.mapperFiles, mf)
 		}

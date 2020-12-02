@@ -61,7 +61,7 @@ func (m *selectMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMa
 	var builder strings.Builder
 	err := t.Execute(&builder, data)
 	if err != nil {
-		batis.LogFatal(err.Error())
+		batis.Error(err.Error())
 		return m
 	}
 	m.sql = builder.String()
@@ -92,7 +92,7 @@ func (m *selectMapper) ExecWithParamsArgs(params []*NamedParam, args ...interfac
 	}
 
 	if batis.showSql {
-		batis.LogInfo("binding[%s] select[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, args)
+		batis.Info("binding[%s] select[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, args)
 	}
 
 	if err != nil {

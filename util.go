@@ -111,14 +111,14 @@ func queryByTx(m *selectMapper, tx *Tx, sql string, args ...interface{}) (*sql.R
 	if args != nil && len(args) > 0 {
 		rows, err := tx.tx.Query(sql, args...)
 		if err != nil {
-			batis.LogFatal("binding[%s] update[%s] queryByTx error : %v", m.binding, m.id, err)
+			batis.Error("binding[%s] update[%s] queryByTx error : %v", m.binding, m.id, err)
 			return nil, err
 		}
 		return rows, nil
 	} else {
 		rows, err := tx.tx.Query(sql)
 		if err != nil {
-			batis.LogFatal("binding[%s] update[%s] queryByTx error : %v", m.binding, m.id, err)
+			batis.Error("binding[%s] update[%s] queryByTx error : %v", m.binding, m.id, err)
 			return nil, err
 		}
 		return rows, nil
@@ -130,14 +130,14 @@ func queryByDB(m *selectMapper, db *DB, sql string, args ...interface{}) (*sql.R
 	if args != nil && len(args) > 0 {
 		rows, err := db.db.Query(sql, args...)
 		if err != nil {
-			batis.LogFatal("binding[%s] update[%s] queryByDB error : %v", m.binding, m.id, err)
+			batis.Error("binding[%s] update[%s] queryByDB error : %v", m.binding, m.id, err)
 			return nil, err
 		}
 		return rows, err
 	} else {
 		rows, err := db.db.Query(sql)
 		if err != nil {
-			batis.LogFatal("binding[%s] update[%s] queryByDB error : %v", m.binding, m.id, err)
+			batis.Error("binding[%s] update[%s] queryByDB error : %v", m.binding, m.id, err)
 			return nil, err
 		}
 		return rows, err
@@ -149,14 +149,14 @@ func updateByTx(m *updateMapper, tx *Tx, sql string, args ...interface{}) (sql.R
 	if args != nil && len(args) > 0 {
 		result, err := tx.tx.Exec(sql, args...)
 		if err != nil {
-			batis.LogFatal("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
+			batis.Error("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
 			return nil, err
 		}
 		return result, nil
 	} else {
 		result, err := tx.tx.Exec(sql)
 		if err != nil {
-			batis.LogFatal("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
+			batis.Error("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
 			return nil, err
 		}
 		return result, nil
@@ -168,14 +168,14 @@ func updateByDB(m *updateMapper, db *DB, sql string, args ...interface{}) (sql.R
 	if args != nil && len(args) > 0 {
 		result, err := db.db.Exec(sql, args...)
 		if err != nil {
-			batis.LogFatal("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
+			batis.Error("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
 			return nil, err
 		}
 		return result, nil
 	} else {
 		result, err := db.db.Exec(sql)
 		if err != nil {
-			batis.LogFatal("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
+			batis.Error("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
 			return nil, err
 		}
 		return result, nil
