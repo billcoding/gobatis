@@ -3,7 +3,7 @@ package gobatis
 //Define txMapper struct
 type txMapper struct {
 	tx     *Tx
-	mapper mapper
+	mapper *mapper
 }
 
 //Get update mapper
@@ -27,14 +27,14 @@ func (mapper *txMapper) Rollback() error {
 
 //Get txMapper
 func (b *Batis) TxMapper(binding string) *txMapper {
-	mapper := b.Mapper(binding)
-	db := mapper.ds.db.db
-	tx := mapper.ds.db.Begin().tx
+	m := b.Mapper(binding)
+	db := m.currentDS.db
+	tx := db.Begin().tx
 	return &txMapper{
 		tx: &Tx{
-			db: db,
+			db: db.db,
 			tx: tx,
 		},
-		mapper: *mapper,
+		mapper: m,
 	}
 }

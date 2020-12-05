@@ -3,6 +3,7 @@ package gobatis
 import (
 	"encoding/json"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"testing"
 )
 
@@ -24,23 +25,24 @@ CREATE TABLE `user` (
 const dsn = "root:123@tcp(127.0.0.1:3306)/test"
 
 func TestInsert(t *testing.T) {
-	var batis = Default().Init().RegisterDS("master", dsn)
-	userMapper := batis.Mapper("user")
+	var b = Default().Init().DSN(dsn)
+	b.Config.PrintSql = true
+	userMapper := b.Mapper("user")
 	fmt.Println(userMapper.Update("insert").Exec("bdsfsdfill"))
 }
 
 func TestDelete(t *testing.T) {
-	var batis = Default().Init().RegisterDS("master", dsn)
+	var batis = Default().Init().DSN(dsn)
 	fmt.Println(batis.Mapper("user").Update("delete").Exec(3))
 }
 
 func TestUpdate(t *testing.T) {
-	var batis = Default().Init().RegisterDS("master", dsn)
+	var batis = Default().Init().DSN(dsn)
 	fmt.Println(batis.Mapper("user").Update("update").Exec("updated", 6))
 }
 
 func TestSelectSimple(t *testing.T) {
-	var batis = Default().Init().RegisterDS("master", dsn)
+	var batis = Default().Init().DSN(dsn)
 	userMapper := batis.Mapper("user")
 	var time string
 	userMapper.Select("selectSimple").Exec().Single(&time)
@@ -48,7 +50,7 @@ func TestSelectSimple(t *testing.T) {
 }
 
 func TestSelectStruct(t *testing.T) {
-	var batis = Default().Init().Choose(SQLite3).RegisterDS("master", "./user.db")
+	var batis = Default().Init().DSNWithDialect(SQLite, "./user.db")
 	type User struct {
 		Id   int    `db:"id" json:"id"`
 		Name string `db:"name" json:"name"`
@@ -59,7 +61,7 @@ func TestSelectStruct(t *testing.T) {
 }
 
 func TestTx(t *testing.T) {
-	var mapper = Default().Init().RegisterDS("master", dsn).TxMapper("user")
+	var mapper = Default().Init().DSN(dsn).TxMapper("user")
 	mapper.Update("insert").Exec("zhangsan")
 	mapper.Update("insert").Exec("lisi")
 	mapper.Update("insert").Exec("wangwu")

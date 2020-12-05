@@ -15,7 +15,8 @@ func (u *User) Show() {
 }
 
 func TestTemplateSelect(t *testing.T) {
-	batis := Default().RegisterDS("_", dsn).ShowSql(true).Init()
+	batis := Default().DSN(dsn).Init()
+	batis.Config.PrintSql = true
 	users := batis.Mapper("user2").Select("query").Prepare(map[string]interface{}{
 		"id":   "",
 		"name": "",
@@ -27,7 +28,8 @@ func TestTemplateSelect(t *testing.T) {
 }
 
 func TestTemplateInsert(t *testing.T) {
-	batis := Default().RegisterDS("_", dsn).ShowSql(true).Init()
+	batis := Default().DSN(dsn).Init()
+	batis.Config.PrintSql = true
 	users := make([]*User, 5)
 	users[0] = &User{Name: "张三"}
 	users[1] = &User{Name: "李四"}

@@ -48,7 +48,12 @@ func replaceNamedParams(sql string, params ...*NamedParam) string {
 }
 
 //Return struct field name-column mapping
-func getFieldMap(structPtr interface{}) map[string]string {
+func getFieldMap(logger *log, structPtr interface{}) map[string]string {
+	defer func() {
+		if re := recover(); re != nil {
+			logger.Error("%v", re)
+		}
+	}()
 	reflectType := reflect.TypeOf(structPtr).Elem()
 	fieldNum := reflectType.NumField()
 	fieldMap := make(map[string]string, 0)
@@ -64,29 +69,34 @@ func getFieldMap(structPtr interface{}) map[string]string {
 }
 
 //Scan a struct from rows
-func scanStruct(rows *sql.Rows, structPtr interface{}) []interface{} {
+func scanStruct(logger *log, rows *sql.Rows, structPtr interface{}) []interface{} {
+	defer func() {
+		if re := recover(); re != nil {
+			logger.Error("%v", re)
+		}
+	}()
 	//must be kind of Ptr
 	if reflect.TypeOf(structPtr).Kind() != reflect.Ptr {
-		panic("structPtr must be the kind of reflect.Ptr")
+		logger.Error("structPtr must be the kind of reflect.Ptr")
 	}
 
 	//receive the struct type
 	rt := reflect.TypeOf(structPtr).Elem()
 	//get the struct field name map
-	fieldMap := getFieldMap(structPtr)
+	fieldMap := getFieldMap(logger, structPtr)
 	//get rows's columns
 	columns, _ := rows.Columns()
 	//make return slice
 	list := make([]interface{}, 0)
 
+	//release conn
+	defer rows.Close()
 	for rows.Next() {
 		//make struct field num length slice
 		fieldAddrs := make([]interface{}, len(columns))
 		//match's column and field
-
 		//create new struct == dynamic create struct object
 		nrv := reflect.New(rt).Elem()
-
 		for i, column := range columns {
 			if fieldName, have := fieldMap[column]; have {
 				field := nrv.FieldByName(fieldName)
@@ -100,84 +110,5 @@ func scanStruct(rows *sql.Rows, structPtr interface{}) []interface{} {
 		rows.Scan(fieldAddrs...)
 		list = append(list, nrv.Addr().Interface())
 	}
-
-	//release conn
-	rows.Close()
 	return list
-}
-
-//Query on tx
-func queryByTx(m *selectMapper, tx *Tx, sql string, args ...interface{}) (*sql.Rows, error) {
-	if args != nil && len(args) > 0 {
-		rows, err := tx.tx.Query(sql, args...)
-		if err != nil {
-			batis.Error("binding[%s] update[%s] queryByTx error : %v", m.binding, m.id, err)
-			return nil, err
-		}
-		return rows, nil
-	} else {
-		rows, err := tx.tx.Query(sql)
-		if err != nil {
-			batis.Error("binding[%s] update[%s] queryByTx error : %v", m.binding, m.id, err)
-			return nil, err
-		}
-		return rows, nil
-	}
-}
-
-//Query on db
-func queryByDB(m *selectMapper, db *DB, sql string, args ...interface{}) (*sql.Rows, error) {
-	if args != nil && len(args) > 0 {
-		rows, err := db.db.Query(sql, args...)
-		if err != nil {
-			batis.Error("binding[%s] update[%s] queryByDB error : %v", m.binding, m.id, err)
-			return nil, err
-		}
-		return rows, err
-	} else {
-		rows, err := db.db.Query(sql)
-		if err != nil {
-			batis.Error("binding[%s] update[%s] queryByDB error : %v", m.binding, m.id, err)
-			return nil, err
-		}
-		return rows, err
-	}
-}
-
-//Update on tx
-func updateByTx(m *updateMapper, tx *Tx, sql string, args ...interface{}) (sql.Result, error) {
-	if args != nil && len(args) > 0 {
-		result, err := tx.tx.Exec(sql, args...)
-		if err != nil {
-			batis.Error("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
-			return nil, err
-		}
-		return result, nil
-	} else {
-		result, err := tx.tx.Exec(sql)
-		if err != nil {
-			batis.Error("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
-			return nil, err
-		}
-		return result, nil
-	}
-}
-
-//Update on db
-func updateByDB(m *updateMapper, db *DB, sql string, args ...interface{}) (sql.Result, error) {
-	if args != nil && len(args) > 0 {
-		result, err := db.db.Exec(sql, args...)
-		if err != nil {
-			batis.Error("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
-			return nil, err
-		}
-		return result, nil
-	} else {
-		result, err := db.db.Exec(sql)
-		if err != nil {
-			batis.Error("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
-			return nil, err
-		}
-		return result, nil
-	}
 }

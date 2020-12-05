@@ -2,19 +2,26 @@ package gobatis
 
 import (
 	"fmt"
+	l "log"
 )
 
+//Define log struct
+type log struct {
+	ologger *l.Logger
+	elogger *l.Logger
+}
+
 //Info level
-func (b *Batis) Info(message string, args ...interface{}) {
-	b.olog.Println(fmt.Sprintf(message, args...))
+func (l *log) Info(message string, args ...interface{}) {
+	l.ologger.Println(fmt.Sprintf(message, args...))
 }
 
 //Warn level
-func (b *Batis) Warn(message string, args ...interface{}) {
-	b.olog.Println(fmt.Sprintf(message, args...))
+func (l *log) Warn(message string, args ...interface{}) {
+	l.ologger.Println(fmt.Sprintf(message, args...))
 }
 
 //Error level
-func (b *Batis) Error(message string, args ...interface{}) {
-	b.elog.Println(fmt.Sprintf(message, args...))
+func (l *log) Error(message string, args ...interface{}) {
+	l.elogger.Println(fmt.Sprintf(message, args...))
 }

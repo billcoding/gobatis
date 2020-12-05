@@ -18,14 +18,6 @@ A sample db tools with binding between sqls and xml nodes, similar like mybatis 
 2. SQLite/SQLite3
 3. MSSQL/SQLServer
 
-## Choose dialect
-
-```
-import _ "github.com/mattn/go-sqlite3"
-
-batis.Choose(batis.SQLite3)
-```
-
 ## Install
 
 - GOPATH
@@ -49,28 +41,28 @@ require github.com/billcoding/gobatis latest
 - Insert
 
 ```
-userMapper := Default().Init().RegisterDS("master", dsn).Mapper("user")
+userMapper := Default().Init().DSN(dsn).Mapper("user")
 err := userMapper.Update("insert").Exec("inserted")
 ```
 
 - Delete
 
 ```
-userMapper := Default().Init().RegisterDS("master", dsn).Mapper("user")
+userMapper := Default().Init().DSN(dsn).Mapper("user")
 err := userMapper.Update("delete").Exec(1)
 ```
 
 - Update
 
 ```
-userMapper := Default().Init().RegisterDS("master", dsn).Mapper("user")
+userMapper := Default().Init().DSN(dsn).Mapper("user")
 err := userMapper.Update("update").Exec("updated", 1)
 ```
 
 - Select Simple
 
 ```
-var batis = Default().Init().RegisterDS("master", dsn)
+var batis = Default().Init().DSN(dsn)
 userMapper := batis.Mapper("user")
 userMapper.Select("selectSimple").Exec().Call(func(rows *sql.Rows) {
     if rows.Next() {
@@ -78,7 +70,6 @@ userMapper.Select("selectSimple").Exec().Call(func(rows *sql.Rows) {
         rows.Scan(&t)
         fmt.Printf("time is %v\n", t)
     }
-    rows.Close()
 })
 
 ```
@@ -86,7 +77,7 @@ userMapper.Select("selectSimple").Exec().Call(func(rows *sql.Rows) {
 - Select Struct
 
 ```
-var batis = Default().Init().RegisterDS("master", dsn)
+var batis = Default().Init().DSN(dsn)
 type User struct {
     Id   int    `db:"id"`
     Name string `db:"name"`

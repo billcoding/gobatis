@@ -8,9 +8,10 @@ import (
 
 //Define select mapper struct
 type selectMapper struct {
+	logger      *log   //logger
+	printSql    bool   //print sql
 	binding     string //binding key
 	id          string //id
-	tx          *Tx    //tx
 	db          *DB    //db
 	originalSql string //original sql
 	sql         string //sql
@@ -18,31 +19,51 @@ type selectMapper struct {
 
 //Define selectCall struct
 type selectCall struct {
-	rows *sql.Rows
+	logger *log
+	rows   *sql.Rows
 }
 
 //Get single rows
-func (call *selectCall) Single(dists ...interface{}) error {
-	if call.rows.Next() {
-		call.rows.Scan(dists...)
-	}
+func (c *selectCall) Single(dists ...interface{}) error {
+	defer func() {
+		if re := recover(); re != nil {
+			c.logger.Error("%v", re)
+		}
+	}()
 	//fixed
 	//close rows
 	//release conn
-	call.rows.Close()
-	return call.rows.Err()
+	defer c.rows.Close()
+	if c.rows.Next() {
+		c.rows.Scan(dists...)
+	}
+	return c.rows.Err()
 }
 
 //Get list rows
-func (call *selectCall) List(structPtr interface{}) []interface{} {
-	return scanStruct(call.rows, structPtr)
+func (c *selectCall) List(structPtr interface{}) []interface{} {
+	defer func() {
+		if re := recover(); re != nil {
+			c.logger.Error("%v", re)
+		}
+	}()
+	return scanStruct(c.logger, c.rows, structPtr)
 }
 
 //Call rows
-func (call *selectCall) Call(callback func(rows *sql.Rows)) {
-	if callback != nil {
-		callback(call.rows)
+func (c *selectCall) Call(callback func(rows *sql.Rows)) {
+	if callback == nil {
+		return
 	}
+	func() {
+		defer func() {
+			if re := recover(); re != nil {
+				c.logger.Error("%v", re)
+			}
+		}()
+		defer c.rows.Close()
+		callback(c.rows)
+	}()
 }
 
 //Prepare using text/template
@@ -52,6 +73,11 @@ func (m *selectMapper) Prepare(data interface{}) *selectMapper {
 
 //Prepare using text/template
 func (m *selectMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMap) *selectMapper {
+	defer func() {
+		if re := recover(); re != nil {
+			m.logger.Error("%v", re)
+		}
+	}()
 	var t *template.Template
 	if funcMap == nil {
 		t = template.Must(template.New("").Parse(m.originalSql))
@@ -61,7 +87,7 @@ func (m *selectMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMa
 	var builder strings.Builder
 	err := t.Execute(&builder, data)
 	if err != nil {
-		batis.Error(err.Error())
+		m.logger.Error(err.Error())
 		return m
 	}
 	m.sql = builder.String()
@@ -80,24 +106,52 @@ func (m *selectMapper) ExecWithParams(params ...*NamedParam) *selectCall {
 
 //Select exec with args and named params
 func (m *selectMapper) ExecWithParamsArgs(params []*NamedParam, args ...interface{}) *selectCall {
+	defer func() {
+		if re := recover(); re != nil {
+			m.logger.Error("%v", re)
+		}
+	}()
 	var rows *sql.Rows
 	var err error
 
 	//replace namedParam
 	m.sql = replaceNamedParams(m.sql, params...)
-	if m.tx != nil {
-		rows, err = queryByTx(m, m.tx, m.sql, args...)
-	} else {
-		rows, err = queryByDB(m, m.db, m.sql, args...)
-	}
+	rows, err = m.queryByDB(args...)
 
-	if batis.showSql {
-		batis.Info("binding[%s] select[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, args)
+	if m.printSql {
+		m.logger.Info("binding[%s] select[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, args)
 	}
 
 	if err != nil {
 		return nil
 	}
 
-	return &selectCall{rows: rows}
+	return &selectCall{
+		logger: m.logger,
+		rows:   rows,
+	}
+}
+
+//Query on db
+func (m *selectMapper) queryByDB(args ...interface{}) (*sql.Rows, error) {
+	defer func() {
+		if re := recover(); re != nil {
+			m.logger.Error("%v", re)
+		}
+	}()
+	if args != nil && len(args) > 0 {
+		rows, err := m.db.db.Query(m.sql, args...)
+		if err != nil {
+			m.logger.Error("binding[%s] update[%s] queryByDB error : %v", m.binding, m.id, err)
+			return nil, err
+		}
+		return rows, err
+	} else {
+		rows, err := m.db.db.Query(m.sql)
+		if err != nil {
+			m.logger.Error("binding[%s] update[%s] queryByDB error : %v", m.binding, m.id, err)
+			return nil, err
+		}
+		return rows, err
+	}
 }

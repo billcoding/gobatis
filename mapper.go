@@ -2,80 +2,72 @@ package gobatis
 
 //Define mapper struct
 type mapper struct {
-	binding       string                  //binding name
-	ds            ds                      //mapper ds
-	updateMappers map[string]updateMapper //update mappers
-	selectMappers map[string]selectMapper //select mappers
+	logger        *log                     //logger
+	printSql      bool                     //print sql
+	binding       string                   //binding name
+	currentDSName string                   //current ds name
+	currentDS     *DS                      //current ds
+	multiDS       MultiDS                  //multi ds
+	updateMappers map[string]*updateMapper //update mappers
+	selectMappers map[string]*selectMapper //select mappers
 }
 
 //Get select mapper
-func (mapper *mapper) Select(id string) *selectMapper {
-	selectMapper, have := mapper.selectMappers[id]
-	if !have {
-		batis.Error("no select node : %v", id)
-		return nil
-	}
-	//set db
-	selectMapper.db = mapper.ds.db
-	return &selectMapper
+func (m *mapper) Select(id string) *selectMapper {
+	return m.SelectWithDS(id, "")
 }
 
-//Get update mapper
-func (mapper *mapper) Update(id string) *updateMapper {
-	updateMapper, have := mapper.updateMappers[id]
+//Get select mapper with ds
+func (m *mapper) SelectWithDS(id, ds string) *selectMapper {
+	selectMapper, have := m.selectMappers[id]
 	if !have {
-		batis.Error("no update node : %v", id)
+		m.logger.Error("no select node : %v", id)
 		return nil
 	}
-	//set db
-	updateMapper.db = mapper.ds.db
-	return &updateMapper
-}
-
-//Get select mapper
-func (mapper *txMapper) Select(id string) *selectMapper {
-	selectMapper := mapper.mapper.Select(id)
-	if selectMapper != nil {
-		selectMapper.tx = mapper.tx
+	if ds == "" {
+		//set default db
+		ds, db := m.multiDS.defaultDS()
+		m.logger.Info("[SelectMapper]Choose DS[%s]", ds)
+		selectMapper.db = db.db
+	} else {
+		mds, have := m.multiDS[ds]
+		if !have {
+			m.logger.Error("[MultiDS]Named DS[%s] was not registered", ds)
+			return nil
+		}
+		m.logger.Info("[MultiDS]Choose DS: %s", ds)
+		selectMapper.db = mds.db
 	}
+	selectMapper.printSql = m.printSql
 	return selectMapper
 }
 
-//Get mapper
-func (b *Batis) Mapper(binding string) *mapper {
-	mapper, have := b.mappers[binding]
+//Get update mapper
+func (m *mapper) Update(id string) *updateMapper {
+	return m.UpdateWithDS(id, "")
+}
+
+//Get update mapper with ds
+func (m *mapper) UpdateWithDS(id, ds string) *updateMapper {
+	updateMapper, have := m.updateMappers[id]
 	if !have {
-		b.Error("no binding : %v", binding)
+		m.logger.Error("no update node : %v", id)
 		return nil
 	}
-
-	//init ds
-	if len(b.dss) == 1 {
-		for _, ds := range b.dss {
-			mapper.ds = *ds
-			break
+	if ds == "" {
+		//set default db
+		ds, db := m.multiDS.defaultDS()
+		m.logger.Info("[MultiDS]Choose DS[%s]", ds)
+		updateMapper.db = db.db
+	} else {
+		mds, have := m.multiDS[ds]
+		if !have {
+			m.logger.Error("[MultiDS]Named DS[%s] was not registered", ds)
+			return nil
 		}
-	} else if len(b.dss) > 1 {
-		for name, ds := range b.dss {
-			if name == "master" {
-				mapper.ds = *ds
-				break
-			}
-		}
+		m.logger.Info("[MultiDS]Choose DS[%s]", ds)
+		updateMapper.db = mds.db
 	}
-	return &mapper
-}
-
-//Set mapper path
-func (b *Batis) MapperPaths(mapperPaths ...string) *Batis {
-	b.mapperPaths = mapperPaths
-	return b
-}
-
-//Parse mapper paths
-func (b *Batis) parseMapperPaths() *Batis {
-	for _, mapperPath := range b.mapperPaths {
-		b.parsedMapperPaths = append(b.parsedMapperPaths, mapperPath)
-	}
-	return b
+	updateMapper.printSql = m.printSql
+	return updateMapper
 }

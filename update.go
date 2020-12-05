@@ -8,6 +8,8 @@ import (
 
 //Define update mapper struct
 type updateMapper struct {
+	printSql     bool   //print sql
+	logger       *log   //logger
 	binding      string //binding key
 	id           string //id
 	tx           *Tx    //sql tx
@@ -44,7 +46,7 @@ func (m *updateMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMa
 	var builder strings.Builder
 	err := t.Execute(&builder, data)
 	if err != nil {
-		batis.Error(err.Error())
+		m.logger.Error(err.Error())
 		return m
 	}
 	m.sql = builder.String()
@@ -70,13 +72,13 @@ func (m *updateMapper) ExecWithParamsArgs(params []*NamedParam, args ...interfac
 	m.sql = replaceNamedParams(m.sql, params...)
 
 	if m.tx != nil {
-		result, err = updateByTx(m, m.tx, m.sql, args...)
+		result, err = m.updateByTx(args...)
 	} else {
-		result, err = updateByDB(m, m.db, m.sql, args...)
+		result, err = m.updateByDB(args...)
 	}
 
-	if batis.showSql {
-		batis.Info("binding[%s] update[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, args)
+	if m.printSql {
+		m.logger.Info("[SQL]binding[%s] update[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, args)
 	}
 
 	if err != nil {
@@ -91,4 +93,52 @@ func (m *updateMapper) ExecWithParamsArgs(params []*NamedParam, args ...interfac
 	}
 
 	return nil
+}
+
+//Update on tx
+func (m *updateMapper) updateByTx(args ...interface{}) (sql.Result, error) {
+	defer func() {
+		if re := recover(); re != nil {
+			m.logger.Error("%v", re)
+		}
+	}()
+	if args != nil && len(args) > 0 {
+		result, err := m.tx.tx.Exec(m.sql, args...)
+		if err != nil {
+			m.logger.Error("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
+			return nil, err
+		}
+		return result, nil
+	} else {
+		result, err := m.tx.tx.Exec(m.sql)
+		if err != nil {
+			m.logger.Error("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
+			return nil, err
+		}
+		return result, nil
+	}
+}
+
+//Update on db
+func (m *updateMapper) updateByDB(args ...interface{}) (sql.Result, error) {
+	defer func() {
+		if re := recover(); re != nil {
+			m.logger.Error("%v", re)
+		}
+	}()
+	if args != nil && len(args) > 0 {
+		result, err := m.db.db.Exec(m.sql, args...)
+		if err != nil {
+			m.logger.Error("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
+			return nil, err
+		}
+		return result, nil
+	} else {
+		result, err := m.db.db.Exec(m.sql)
+		if err != nil {
+			m.logger.Error("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
+			return nil, err
+		}
+		return result, nil
+	}
 }

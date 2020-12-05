@@ -6,18 +6,18 @@ import (
 )
 
 const (
-	batisShowSql    = "BATIS_SHOW_SQL"    //batis show sql
+	batisPrintSql   = "BATIS_PRINT_SQL"   //batis print sql
 	batisMapperPath = "BATIS_MAPPER_PATH" //batis mapper path
 	batisDsn        = "BATIS_DSN"         //batis dsn
 )
 
 //parse env variable for gobatis
 func (b *Batis) parseEnv() *Batis {
-	showSql := os.Getenv(batisShowSql)
-	if showSql != "" {
-		ss := strings.ToUpper(showSql)
+	printSql := os.Getenv(batisPrintSql)
+	if printSql != "" {
+		ss := strings.ToUpper(printSql)
 		if ss == "ON" || ss == "TRUE" || ss == "1" {
-			b.ShowSql(true)
+			b.Config.PrintSql = true
 		}
 	}
 	mapperPath := os.Getenv(batisMapperPath)
@@ -31,7 +31,7 @@ func (b *Batis) parseEnv() *Batis {
 		if len(dsns) > 0 {
 			if len(dsns) == 1 && !strings.Contains(dsns[0], ",") {
 				//only one
-				b.RegisterDS("_", dsns[0])
+				b.MultiDS.Add("master", dsns[0])
 			} else {
 				for _, dsnStr := range dsns {
 					dsnArray := strings.Split(dsnStr, ",")
@@ -43,7 +43,7 @@ func (b *Batis) parseEnv() *Batis {
 					} else if len(dsnArray) == 1 {
 						dsn = dsnArray[0]
 					}
-					b.RegisterDS(name, dsn)
+					b.MultiDS.Add(name, dsn)
 				}
 			}
 		}

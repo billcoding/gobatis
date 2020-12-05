@@ -15,7 +15,6 @@ type NamedParam struct {
 //New namedParam
 func NewNamedParam(name string, val interface{}) *NamedParam {
 	if name == "" {
-		batis.Error("namedParam 's name is empty")
 		return nil
 	}
 	return &NamedParam{
