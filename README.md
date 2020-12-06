@@ -8,9 +8,11 @@ A sample db tools with binding between sqls and xml nodes, similar like mybatis 
 
 - Pure native
 - No third dependencies
-- Multiple DataSource supports
-- Multiple Database supports
-- Dynamic SQL supports & Func (Using text/template)
+- Multiple DS & DB
+- Dynamic SQL & Func
+- Native SQL Query
+- Pagable
+- Raw XML
 
 ## Supports database
 
@@ -131,15 +133,15 @@ userList := batis.Mapper("user").Select("selectStruct").Exec().List(new(User))
     <select id="query">
         select * from user as u where 1 = 1
         {{ if ne .id "" }}
-            and u.id = {{ .id }}
+        and u.id = {{ .id }}
         {{ end }}
         {{ if ne .name "" }}
-            and u.name = '{{ .name }}'
+        and u.name = '{{ .name }}'
         {{ end }}
     </select>
 
     <update id="insert">
-       insert into user(name) values
+        insert into user(name) values
         {{ range $index, $element := . }}{{ if gt $index 0 }},{{ end }} ('{{$element.Name}}'){{ end }}
     </update>
 
@@ -151,13 +153,16 @@ userList := batis.Mapper("user").Select("selectStruct").Exec().List(new(User))
 - Register DataSource
 
 ```
-batis.RegisterDS(DSNAME, DSN)
+batis.MultiDS.Add(DSNAME, DSN)
+batis.MultiDS.AddWithDialect(Dialect, DSNAME, DSN)
 ```
 
 - Select DataSource
 
 ```
-mapper.SelectDS(DSNAME)
+mapper.DS(DSNAME)
+mapper.selectWithDS(DSNAME)
+mapper.updateWithDS(DSNAME)
 ```
 
 ## Transaction Support
@@ -182,16 +187,28 @@ txMapper.Rollback()
 
 ## Env Support
 
-- Show SQL
+- Auto Scan Mapper Files
 
 ```
-BATIS_SHOW_SQL
+BATIS_AUTO_SCAN
 
 e.g.
 
-BATIS_SHOW_SQL=1|0
-BATIS_SHOW_SQL=on|ON
-BATIS_SHOW_SQL=true|TRUE
+BATIS_AUTO_SCAN=1|0
+BATIS_AUTO_SCAN=on|ON
+BATIS_AUTO_SCAN=true|TRUE
+```
+
+- Print SQL
+
+```
+BATIS_PRINT_SQL
+
+e.g.
+
+BATIS_PRINT_SQL=1|0
+BATIS_PRINT_SQL=on|ON
+BATIS_PRINT_SQL=true|TRUE
 ```
 
 - Mapper path
@@ -204,7 +221,7 @@ e.g.
 BATIS_MAPPER_PATH=/tmp/myapp/mapper
 ```
 
-- Dsn
+- DSN
 
 ```
 BATIS_DSN
@@ -214,4 +231,23 @@ e.g.
 1. BATIS_DSN=root:123@tcp(192.168.1.8:3306)/test
 2. BATIS_DSN=_,root:123@tcp(192.168.1.8:3306)/test
 3. BATIS_DSN=master,root:123@tcp(192.168.1.8:3306)/test|slave,root:123@tcp(192.168.1.9:3306)/test
+```
+
+## Native SQL Query
+
+```
+mapper.SqlQuery(SQL).Query()
+mapper.SqlQuery(SQL).Exec()
+```
+
+## Raw XML
+
+```
+batis.AddRaw(XML)
+```
+
+## Page
+
+```
+selectMapper.Page(new(TYPE), OFFSET, SIZE) 
 ```
