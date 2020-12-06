@@ -59,17 +59,19 @@ func (m *updateMapper) Exec(args ...interface{}) error {
 }
 
 //Update exec with named params
-func (m *updateMapper) ExecWithParams(params ...*NamedParam) error {
+func (m *updateMapper) ExecWithParams(params ...*Param) error {
 	return m.ExecWithParamsArgs(params)
 }
 
 //Update exec with named params
-func (m *updateMapper) ExecWithParamsArgs(params []*NamedParam, args ...interface{}) error {
+func (m *updateMapper) ExecWithParamsArgs(params []*Param, args ...interface{}) error {
 	var result sql.Result
 	var err error
 
-	//replace named params
-	m.sql = replaceNamedParams(m.sql, params...)
+	if params != nil {
+		//replace namedParam
+		m.replaceParams(params...)
+	}
 
 	if m.tx != nil {
 		result, err = m.updateByTx(args...)
@@ -93,6 +95,11 @@ func (m *updateMapper) ExecWithParamsArgs(params []*NamedParam, args ...interfac
 	}
 
 	return nil
+}
+
+//Replace named params
+func (m *updateMapper) replaceParams(params ...*Param) {
+	m.sql = replaceParams(m.originalSql, params...)
 }
 
 //Update on tx

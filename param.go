@@ -2,24 +2,24 @@ package gobatis
 
 import "fmt"
 
-var namedParamPrefix = "@"
-var namedParamSuffix = "@"
+var paramPrefix = "@"
+var paramSuffix = "@"
 
 //Define namedParam struct
-type NamedParam struct {
+type Param struct {
 	name    string //param name
 	replace string //replace name
 	val     string //param val
 }
 
-//New namedParam
-func NewNamedParam(name string, val interface{}) *NamedParam {
+//New Param
+func NewParam(name string, val interface{}) *Param {
 	if name == "" {
 		return nil
 	}
-	return &NamedParam{
+	return &Param{
 		name:    name,
-		replace: namedParamPrefix + name + namedParamSuffix,
+		replace: paramPrefix + name + paramSuffix,
 		val:     fmt.Sprintf("%v", val),
 	}
 }

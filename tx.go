@@ -10,6 +10,7 @@ type Tx struct {
 
 //Commit the tx
 func (tx *Tx) commit() error {
+
 	return tx.tx.Commit()
 }
 

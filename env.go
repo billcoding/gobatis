@@ -7,6 +7,7 @@ import (
 
 const (
 	batisPrintSql   = "BATIS_PRINT_SQL"   //batis print sql
+	batisAutoScan   = "BATIS_AUTO_SCAN"   //batis auto scan
 	batisMapperPath = "BATIS_MAPPER_PATH" //batis mapper path
 	batisDsn        = "BATIS_DSN"         //batis dsn
 )
@@ -18,6 +19,13 @@ func (b *Batis) parseEnv() *Batis {
 		ss := strings.ToUpper(printSql)
 		if ss == "ON" || ss == "TRUE" || ss == "1" {
 			b.Config.PrintSql = true
+		}
+	}
+	autoScan := os.Getenv(batisAutoScan)
+	if autoScan != "" {
+		ss := strings.ToUpper(autoScan)
+		if ss == "ON" || ss == "TRUE" || ss == "1" {
+			b.Config.AutoScan = true
 		}
 	}
 	mapperPath := os.Getenv(batisMapperPath)

@@ -2,6 +2,7 @@ package gobatis
 
 import (
 	"database/sql"
+	"regexp"
 	"strings"
 	"text/template"
 )
@@ -15,55 +16,7 @@ type selectMapper struct {
 	db          *DB    //db
 	originalSql string //original sql
 	sql         string //sql
-}
-
-//Define selectCall struct
-type selectCall struct {
-	logger *log
-	rows   *sql.Rows
-}
-
-//Get single rows
-func (c *selectCall) Single(dists ...interface{}) error {
-	defer func() {
-		if re := recover(); re != nil {
-			c.logger.Error("%v", re)
-		}
-	}()
-	//fixed
-	//close rows
-	//release conn
-	defer c.rows.Close()
-	if c.rows.Next() {
-		c.rows.Scan(dists...)
-	}
-	return c.rows.Err()
-}
-
-//Get list rows
-func (c *selectCall) List(structPtr interface{}) []interface{} {
-	defer func() {
-		if re := recover(); re != nil {
-			c.logger.Error("%v", re)
-		}
-	}()
-	return scanStruct(c.logger, c.rows, structPtr)
-}
-
-//Call rows
-func (c *selectCall) Call(callback func(rows *sql.Rows)) {
-	if callback == nil {
-		return
-	}
-	func() {
-		defer func() {
-			if re := recover(); re != nil {
-				c.logger.Error("%v", re)
-			}
-		}()
-		defer c.rows.Close()
-		callback(c.rows)
-	}()
+	extraSql    string //extra sql
 }
 
 //Prepare using text/template
@@ -71,7 +24,7 @@ func (m *selectMapper) Prepare(data interface{}) *selectMapper {
 	return m.PrepareWithFunc(data, nil)
 }
 
-//Prepare using text/template
+//Prepare using text/template with func
 func (m *selectMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMap) *selectMapper {
 	defer func() {
 		if re := recover(); re != nil {
@@ -100,12 +53,12 @@ func (m *selectMapper) Exec(args ...interface{}) *selectCall {
 }
 
 //Select exec with params
-func (m *selectMapper) ExecWithParams(params ...*NamedParam) *selectCall {
+func (m *selectMapper) ExecWithParams(params ...*Param) *selectCall {
 	return m.ExecWithParamsArgs(params)
 }
 
 //Select exec with args and named params
-func (m *selectMapper) ExecWithParamsArgs(params []*NamedParam, args ...interface{}) *selectCall {
+func (m *selectMapper) ExecWithParamsArgs(params []*Param, args ...interface{}) *selectCall {
 	defer func() {
 		if re := recover(); re != nil {
 			m.logger.Error("%v", re)
@@ -114,8 +67,11 @@ func (m *selectMapper) ExecWithParamsArgs(params []*NamedParam, args ...interfac
 	var rows *sql.Rows
 	var err error
 
-	//replace namedParam
-	m.sql = replaceNamedParams(m.sql, params...)
+	if params != nil {
+		//replace namedParam
+		m.replaceParams(params...)
+	}
+
 	rows, err = m.queryByDB(args...)
 
 	if m.printSql {
@@ -127,9 +83,46 @@ func (m *selectMapper) ExecWithParamsArgs(params []*NamedParam, args ...interfac
 	}
 
 	return &selectCall{
+		sm:     m,
+		args:   args,
 		logger: m.logger,
 		rows:   rows,
 	}
+}
+
+//Replace named params
+func (m *selectMapper) replaceParams(params ...*Param) {
+	m.sql = replaceParams(m.originalSql, params...)
+}
+
+//Query on db
+func (m *selectMapper) queryCountByDB(args ...interface{}) int {
+	defer func() {
+		if re := recover(); re != nil {
+			m.logger.Error("%v", re)
+		}
+	}()
+
+	rx := regexp.MustCompile(`^\s*[Ss][Ee][Ll][Ee][Cc][Tt]([\s\S]+)[Ff][Rr][Oo][Mm]`)
+	csql := rx.ReplaceAllString(m.sql, " select count(*) from ")
+
+	var rows *sql.Rows
+	var err error
+	if args != nil && len(args) > 0 {
+		rows, err = m.db.db.Query(csql, args...)
+	} else {
+		rows, err = m.db.db.Query(csql)
+	}
+	if err != nil {
+		m.logger.Error("binding[%s] select[%s] queryCountByDB error : %v", m.binding, m.id, err)
+		return 0
+	}
+	defer rows.Close()
+	c := 0
+	if rows.Next() {
+		rows.Scan(&c)
+	}
+	return c
 }
 
 //Query on db
@@ -140,16 +133,16 @@ func (m *selectMapper) queryByDB(args ...interface{}) (*sql.Rows, error) {
 		}
 	}()
 	if args != nil && len(args) > 0 {
-		rows, err := m.db.db.Query(m.sql, args...)
+		rows, err := m.db.db.Query(m.sql+m.extraSql, args...)
 		if err != nil {
-			m.logger.Error("binding[%s] update[%s] queryByDB error : %v", m.binding, m.id, err)
+			m.logger.Error("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
 			return nil, err
 		}
 		return rows, err
 	} else {
-		rows, err := m.db.db.Query(m.sql)
+		rows, err := m.db.db.Query(m.sql + m.extraSql)
 		if err != nil {
-			m.logger.Error("binding[%s] update[%s] queryByDB error : %v", m.binding, m.id, err)
+			m.logger.Error("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
 			return nil, err
 		}
 		return rows, err
