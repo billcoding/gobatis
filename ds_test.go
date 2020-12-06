@@ -6,10 +6,9 @@ import (
 )
 
 func TestDs(t *testing.T) {
-	b := Default()
-	b.Init()
+	b := Default().Init().DSN(dsn)
 	m := b.Mapper("user")
 	time := ""
-	m.Select("selectSimple").Exec().Single(&time)
+	m.Select("selectSimple").Exec().Scan(&time)
 	fmt.Println(time)
 }

@@ -32,11 +32,11 @@ func (m MultiDS) Size() int {
 
 //Add datasource
 func (m MultiDS) Add(name, dsn string) *DS {
-	return m.AddWithDialect(MySQL, name, dsn)
+	return m.AddWithDialect(name, dsn, MySQL)
 }
 
 //Add datasource with dialect
-func (m MultiDS) AddWithDialect(dialect Dialect, name, dsn string) *DS {
+func (m MultiDS) AddWithDialect(name, dsn string, dialect Dialect) *DS {
 	db, err := sql.Open(string(dialect), dsn)
 	if err != nil {
 		panic(err)
