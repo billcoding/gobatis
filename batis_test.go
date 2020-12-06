@@ -3,7 +3,6 @@ package gobatis
 import (
 	"encoding/json"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 	"testing"
 )
 
@@ -45,7 +44,7 @@ func TestSelectSimple(t *testing.T) {
 	var batis = Default().Init().DSN(dsn)
 	userMapper := batis.Mapper("user")
 	var time string
-	userMapper.Select("selectSimple").Exec().Single(&time)
+	userMapper.Select("selectSimple").Exec().Scan(&time)
 	fmt.Println("time =", time)
 }
 

@@ -10,6 +10,7 @@ var batis *Batis
 
 //Define batis struct
 type Batis struct {
+	inited            bool                   //init done?
 	mutex             sync.Mutex             //mutex
 	Config            *Config                //config
 	Logger            *log                   //Logger
@@ -25,6 +26,7 @@ func newBatis() *Batis {
 	return &Batis{
 		mutex: sync.Mutex{},
 		Config: &Config{
+			AutoScan:    true,
 			PrintSql:    false,
 			MapperPaths: []string{"./mapper"},
 		},
@@ -32,6 +34,7 @@ func newBatis() *Batis {
 			ologger: l.New(os.Stdout, "[GOBATIS]", l.Flags()),
 			elogger: l.New(os.Stdout, "[GOBATIS]", l.Flags()),
 		},
+
 		MultiDS:     make(map[string]*DS, 0),
 		mappers:     make(map[string]*mapper, 0),
 		mapperNodes: make(map[string]*mapperNode, 0),
@@ -58,11 +61,15 @@ func (b *Batis) Init() *Batis {
 	b.parseEnv()
 	b.parseMapperPaths()
 	b.scanMapper()
+	b.inited = true
 	return b
 }
 
 //Start scan mapper file for binding
 func (b *Batis) scanMapper() *Batis {
+	if !b.Config.AutoScan {
+		return b
+	}
 	if len(b.parsedMapperPaths) <= 0 {
 		return b
 	}
