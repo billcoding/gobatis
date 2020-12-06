@@ -22,4 +22,8 @@
         select u.id as id, u.name as name from user as u
     </select>
 
+    <select id="queryPage">
+        select u.id as id, u.name as name from user as u
+    </select>
+
 </batis-mapper>
