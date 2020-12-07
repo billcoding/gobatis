@@ -31,8 +31,8 @@ func newBatis() *Batis {
 			MapperPaths: []string{"./mapper"},
 		},
 		Logger: &log{
-			ologger: l.New(os.Stdout, "[GOBATIS]", l.Flags()),
-			elogger: l.New(os.Stdout, "[GOBATIS]", l.Flags()),
+			ologger: l.New(os.Stdout, "[GOBATIS]", l.LstdFlags),
+			elogger: l.New(os.Stdout, "[GOBATIS]", l.LstdFlags),
 		},
 
 		MultiDS:     make(map[string]*DS, 0),
