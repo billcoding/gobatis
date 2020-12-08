@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"text/template"
 )
 
 //Get mapperNode files
@@ -43,4 +44,19 @@ func replaceParams(sql string, params ...*Param) string {
 		}
 	}
 	return replacedSql
+}
+
+func joinFuncMap(m1, m2 template.FuncMap) template.FuncMap {
+	gfuncMap := make(template.FuncMap, 0)
+	if m1 != nil && len(m1) > 0 {
+		for k, v := range m1 {
+			gfuncMap[k] = v
+		}
+	}
+	if m2 != nil && len(m2) > 0 {
+		for k, v := range m2 {
+			gfuncMap[k] = v
+		}
+	}
+	return gfuncMap
 }

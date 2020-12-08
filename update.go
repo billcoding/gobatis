@@ -8,6 +8,7 @@ import (
 
 //Define update mapper struct
 type updateMapper struct {
+	gfuncMap     template.FuncMap
 	printSql     bool   //print sql
 	logger       *log   //logger
 	binding      string //binding key
@@ -38,10 +39,11 @@ func (m *updateMapper) Prepare(data interface{}) *updateMapper {
 //Prepare using text/template
 func (m *updateMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMap) *updateMapper {
 	var t *template.Template
-	if funcMap == nil {
+	gfuncMap := joinFuncMap(m.gfuncMap, funcMap)
+	if len(gfuncMap) <= 0 {
 		t = template.Must(template.New("").Parse(m.originalSql))
 	} else {
-		t = template.Must(template.New("").Funcs(funcMap).Parse(m.originalSql))
+		t = template.Must(template.New("").Funcs(gfuncMap).Parse(m.originalSql))
 	}
 	var builder strings.Builder
 	err := t.Execute(&builder, data)

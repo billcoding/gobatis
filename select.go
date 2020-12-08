@@ -9,6 +9,7 @@ import (
 
 //Define select mapper struct
 type selectMapper struct {
+	gfuncMap    template.FuncMap
 	logger      *log   //logger
 	printSql    bool   //print sql
 	binding     string //binding key
@@ -32,10 +33,11 @@ func (m *selectMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMa
 		}
 	}()
 	var t *template.Template
-	if funcMap == nil {
+	gfuncMap := joinFuncMap(m.gfuncMap, funcMap)
+	if len(gfuncMap) <= 0 {
 		t = template.Must(template.New("").Parse(m.originalSql))
 	} else {
-		t = template.Must(template.New("").Funcs(funcMap).Parse(m.originalSql))
+		t = template.Must(template.New("").Funcs(gfuncMap).Parse(m.originalSql))
 	}
 	var builder strings.Builder
 	err := t.Execute(&builder, data)

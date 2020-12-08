@@ -4,6 +4,7 @@ import (
 	l "log"
 	"os"
 	"sync"
+	"text/template"
 )
 
 var batis *Batis
@@ -15,6 +16,7 @@ type Batis struct {
 	Config            *Config                //config
 	Logger            *log                   //Logger
 	MultiDS           MultiDS                //multiple datasource
+	FuncMap           template.FuncMap       //Func Map
 	parsedMapperPaths []string               //parsed mapper path
 	mapperFiles       []string               //mapperNode files
 	mappers           map[string]*mapper     //mapper
@@ -34,10 +36,12 @@ func newBatis() *Batis {
 			ologger: l.New(os.Stdout, "[GOBATIS]", l.LstdFlags),
 			elogger: l.New(os.Stdout, "[GOBATIS]", l.LstdFlags),
 		},
-
-		MultiDS:     make(map[string]*DS, 0),
-		mappers:     make(map[string]*mapper, 0),
-		mapperNodes: make(map[string]*mapperNode, 0),
+		MultiDS:           make(map[string]*DS, 0),
+		FuncMap:           make(map[string]interface{}, 0),
+		parsedMapperPaths: make([]string, 0),
+		mapperFiles:       make([]string, 0),
+		mappers:           make(map[string]*mapper, 0),
+		mapperNodes:       make(map[string]*mapperNode, 0),
 	}
 }
 

@@ -27,15 +27,15 @@ func (m *mapper) SelectWithDS(id, ds string) *selectMapper {
 	if ds == "" {
 		//set default db
 		ds, db := m.multiDS.defaultDS()
-		m.logger.Info("[SelectMapper]Choose DS[%s]", ds)
+		m.logger.Info("[MultiDS]Choose DS[%s]", ds)
 		selectMapper.db = db.db
 	} else {
 		mds, have := m.multiDS[ds]
 		if !have {
-			m.logger.Error("[MultiDS]Named DS[%s] was not registered", ds)
+			m.logger.Error("[MultiDS] DS[%s] was not registered", ds)
 			return nil
 		}
-		m.logger.Info("[MultiDS]Choose DS: %s", ds)
+		m.logger.Info("[MultiDS]Choose DS[%s]", ds)
 		selectMapper.db = mds.db
 	}
 	selectMapper.printSql = m.printSql
@@ -62,7 +62,7 @@ func (m *mapper) UpdateWithDS(id, ds string) *updateMapper {
 	} else {
 		mds, have := m.multiDS[ds]
 		if !have {
-			m.logger.Error("[MultiDS]Named DS[%s] was not registered", ds)
+			m.logger.Error("[MultiDS] DS[%s] was not registered", ds)
 			return nil
 		}
 		m.logger.Info("[MultiDS]Choose DS[%s]", ds)

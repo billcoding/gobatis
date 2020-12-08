@@ -62,6 +62,7 @@ func (b *Batis) prepareUpdateMappers(binding string, mapperUpdateNodes []mapperU
 				continue
 			}
 			updateMapperMap[id] = &updateMapper{
+				gfuncMap:    b.FuncMap,
 				printSql:    b.Config.PrintSql,
 				logger:      b.Logger,
 				binding:     binding,
@@ -85,6 +86,7 @@ func (b *Batis) prepareSelectMappers(binding string, mapperSelectNodes []mapperS
 				continue
 			}
 			selectMapperMap[id] = &selectMapper{
+				gfuncMap:    b.FuncMap,
 				logger:      b.Logger,
 				printSql:    b.Config.PrintSql,
 				binding:     binding,
