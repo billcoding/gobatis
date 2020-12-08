@@ -77,7 +77,7 @@ func (m *selectMapper) ExecWithParamsArgs(params []*Param, args ...interface{}) 
 	rows, err = m.queryByDB(args...)
 
 	if m.printSql {
-		m.logger.Info("binding[%s] select[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, args)
+		m.logger.Info("binding[%s] select[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql+m.extraSql, args)
 	}
 
 	if err != nil {
@@ -118,6 +118,9 @@ func (m *selectMapper) queryCountByDB(args ...interface{}) int {
 	if err != nil {
 		m.logger.Error("binding[%s] select[%s] queryCountByDB error : %v", m.binding, m.id, err)
 		return 0
+	}
+	if m.printSql {
+		m.logger.Info("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, csql, args)
 	}
 	defer rows.Close()
 	c := 0

@@ -45,6 +45,10 @@ func (m *selectMapper) PageWithParamsArgs(rptr interface{}, offset, size int, pa
 	//First query total count
 	totalRows := m.queryCountByDB(args...)
 
+	if m.printSql {
+		m.logger.Info("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, args)
+	}
+
 	if totalRows > 0 {
 		page.TotalRows = totalRows
 		page.TotalPage = int(math.Ceil(float64(totalRows) / float64(size)))
