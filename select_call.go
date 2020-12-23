@@ -110,6 +110,16 @@ func (c *selectCall) List(rptr interface{}) []interface{} {
 	return c.scanStruct()
 }
 
+//Get map rows
+func (c *selectCall) MapList() []map[string]string {
+	defer func() {
+		if re := recover(); re != nil {
+			c.logger.Error("%v", re)
+		}
+	}()
+	return c.scanMap()
+}
+
 //Call rows
 func (c *selectCall) Call(callback func(rows *sql.Rows)) {
 	if callback == nil {
@@ -180,6 +190,41 @@ func (c *selectCall) scanStruct() []interface{} {
 			c.logger.Error("%v", err)
 		}
 		list = append(list, nrv.Addr().Interface())
+	}
+	return list
+}
+
+//Scan a map from rows
+func (c *selectCall) scanMap() []map[string]string {
+	defer func() {
+		if re := recover(); re != nil {
+			c.logger.Error("%v", re)
+		}
+	}()
+	list := make([]map[string]string, 0)
+	columns, _ := c.rows.Columns()
+	//release conn
+	defer func() {
+		err := c.rows.Close()
+		if err != nil {
+			c.logger.Error("%v", err)
+		}
+	}()
+	for c.rows.Next() {
+		m := make(map[string]string, 0)
+		addrs := make([]interface{}, len(columns))
+		for i := range columns {
+			var obj string
+			addrs[i] = &obj
+		}
+		err := c.rows.Scan(addrs...)
+		if err != nil {
+			c.logger.Error("%v", err)
+		}
+		for i, column := range columns {
+			m[column] = *(addrs[i].(*string))
+		}
+		list = append(list, m)
 	}
 	return list
 }
