@@ -5,7 +5,6 @@ import (
 	"reflect"
 )
 
-//Define selectCall struct
 type selectCall struct {
 	sm     *selectMapper //The select mapper
 	args   []interface{} //The args
@@ -14,7 +13,7 @@ type selectCall struct {
 	rptr   interface{}   //The return type ptr
 }
 
-//Scan rows to dists
+// Scan rows to dists
 func (c *selectCall) Scan(dists ...interface{}) error {
 	defer func() {
 		if re := recover(); re != nil {
@@ -39,7 +38,7 @@ func (c *selectCall) Scan(dists ...interface{}) error {
 	return c.rows.Err()
 }
 
-//Return single record
+// Single return single record
 func (c *selectCall) Single() interface{} {
 	defer func() {
 		if re := recover(); re != nil {
@@ -54,7 +53,7 @@ func (c *selectCall) Single() interface{} {
 	return r
 }
 
-//Return single record
+// SingleInt return single record
 func (c *selectCall) SingleInt() int64 {
 	defer func() {
 		if re := recover(); re != nil {
@@ -69,7 +68,7 @@ func (c *selectCall) SingleInt() int64 {
 	return r
 }
 
-//Return single record
+// SingleFloat return single record
 func (c *selectCall) SingleFloat() float64 {
 	defer func() {
 		if re := recover(); re != nil {
@@ -84,7 +83,7 @@ func (c *selectCall) SingleFloat() float64 {
 	return r
 }
 
-//Return single record
+// SingleString return single record
 func (c *selectCall) SingleString() string {
 	defer func() {
 		if re := recover(); re != nil {
@@ -99,7 +98,7 @@ func (c *selectCall) SingleString() string {
 	return r
 }
 
-//Get list rows
+// List get list rows
 func (c *selectCall) List(rptr interface{}) []interface{} {
 	defer func() {
 		if re := recover(); re != nil {
@@ -110,7 +109,7 @@ func (c *selectCall) List(rptr interface{}) []interface{} {
 	return c.scanStruct()
 }
 
-//Get map rows
+// MapList get map rows
 func (c *selectCall) MapList() []map[string]string {
 	defer func() {
 		if re := recover(); re != nil {
@@ -120,7 +119,7 @@ func (c *selectCall) MapList() []map[string]string {
 	return c.scanMap()
 }
 
-//Call rows
+// Call rows
 func (c *selectCall) Call(callback func(rows *sql.Rows)) {
 	if callback == nil {
 		return
@@ -141,7 +140,6 @@ func (c *selectCall) Call(callback func(rows *sql.Rows)) {
 	}()
 }
 
-//Scan a struct from rows
 func (c *selectCall) scanStruct() []interface{} {
 	defer func() {
 		if re := recover(); re != nil {
@@ -194,7 +192,6 @@ func (c *selectCall) scanStruct() []interface{} {
 	return list
 }
 
-//Scan a map from rows
 func (c *selectCall) scanMap() []map[string]string {
 	defer func() {
 		if re := recover(); re != nil {
@@ -229,7 +226,6 @@ func (c *selectCall) scanMap() []map[string]string {
 	return list
 }
 
-//Return struct field name-column mapping
 func (c *selectCall) getFieldMap() map[string]string {
 	defer func() {
 		if re := recover(); re != nil {

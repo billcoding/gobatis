@@ -12,7 +12,6 @@ const (
 	batisDsn        = "BATIS_DSN"         //batis dsn
 )
 
-//parse env variable for gobatis
 func (b *Batis) parseEnv() *Batis {
 	printSql := os.Getenv(batisPrintSql)
 	if printSql != "" {

@@ -5,14 +5,14 @@ import "fmt"
 var paramPrefix = "@"
 var paramSuffix = "@"
 
-//Define namedParam struct
+// Param struct
 type Param struct {
 	name    string //param name
 	replace string //replace name
 	val     string //param val
 }
 
-//New Param
+// NewParam return new Param
 func NewParam(name string, val interface{}) *Param {
 	if name == "" {
 		return nil

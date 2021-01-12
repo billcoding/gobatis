@@ -1,12 +1,11 @@
 package gobatis
 
-//Define txMapper struct
 type txMapper struct {
 	tx     *Tx
 	mapper *mapper
 }
 
-//Get update mapper
+// Update get update mapper
 func (mapper *txMapper) Update(id string) *updateMapper {
 	updateMapper := mapper.mapper.Update(id)
 	if updateMapper != nil {
@@ -15,17 +14,17 @@ func (mapper *txMapper) Update(id string) *updateMapper {
 	return updateMapper
 }
 
-//Get update mapper
+// Commit get update mapper
 func (mapper *txMapper) Commit() error {
 	return mapper.tx.commit()
 }
 
-//Get update mapper
+// Rollback get update mapper
 func (mapper *txMapper) Rollback() error {
 	return mapper.tx.rollback()
 }
 
-//Get txMapper
+// TxMapper get txMapper
 func (b *Batis) TxMapper(binding string) *txMapper {
 	m := b.Mapper(binding)
 	db := m.currentDS.db

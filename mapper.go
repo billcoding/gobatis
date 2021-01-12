@@ -1,23 +1,22 @@
 package gobatis
 
-//Define mapper struct
 type mapper struct {
-	logger        *log                     //logger
-	printSql      bool                     //print sql
-	binding       string                   //binding name
-	currentDSName string                   //current ds name
-	currentDS     *DS                      //current ds
-	multiDS       MultiDS                  //multi ds
-	updateMappers map[string]*updateMapper //update mappers
-	selectMappers map[string]*selectMapper //select mappers
+	logger        *log
+	printSql      bool
+	binding       string
+	currentDSName string
+	currentDS     *DS
+	multiDS       *multiDS
+	updateMappers map[string]*updateMapper
+	selectMappers map[string]*selectMapper
 }
 
-//Get select mapper
+// Select get select mapper
 func (m *mapper) Select(id string) *selectMapper {
 	return m.SelectWithDS(id, "")
 }
 
-//Get select mapper with ds
+// SelectWithDS select mapper with ds
 func (m *mapper) SelectWithDS(id, ds string) *selectMapper {
 	selectMapper, have := m.selectMappers[id]
 	if !have {
@@ -30,7 +29,7 @@ func (m *mapper) SelectWithDS(id, ds string) *selectMapper {
 		m.logger.Info("[MultiDS]Choose DS[%s]", ds)
 		selectMapper.db = db.db
 	} else {
-		mds, have := m.multiDS[ds]
+		mds, have := m.multiDS.mds[ds]
 		if !have {
 			m.logger.Error("[MultiDS] DS[%s] was not registered", ds)
 			return nil
@@ -42,12 +41,12 @@ func (m *mapper) SelectWithDS(id, ds string) *selectMapper {
 	return selectMapper
 }
 
-//Get update mapper
+// Update get update mapper
 func (m *mapper) Update(id string) *updateMapper {
 	return m.UpdateWithDS(id, "")
 }
 
-//Get update mapper with ds
+// UpdateWithDS get update mapper with ds
 func (m *mapper) UpdateWithDS(id, ds string) *updateMapper {
 	updateMapper, have := m.updateMappers[id]
 	if !have {
@@ -60,7 +59,7 @@ func (m *mapper) UpdateWithDS(id, ds string) *updateMapper {
 		m.logger.Info("[MultiDS]Choose DS[%s]", ds)
 		updateMapper.db = db.db
 	} else {
-		mds, have := m.multiDS[ds]
+		mds, have := m.multiDS.mds[ds]
 		if !have {
 			m.logger.Error("[MultiDS] DS[%s] was not registered", ds)
 			return nil

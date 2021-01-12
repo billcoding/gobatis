@@ -5,17 +5,17 @@ import (
 	"math"
 )
 
-//Select page
+// Page select page
 func (m *selectMapper) Page(rptr interface{}, offset, size int, args ...interface{}) *page {
 	return m.PageWithParamsArgs(rptr, offset, size, nil, args...)
 }
 
-//Select exec with params
+// PageWithParams select exec with params
 func (m *selectMapper) PageWithParams(rptr interface{}, offset, size int, params ...*Param) *page {
 	return m.PageWithParamsArgs(rptr, offset, size, params)
 }
 
-//Select exec with args and named params
+// PageWithParamsArgs select exec with args and named params
 func (m *selectMapper) PageWithParamsArgs(rptr interface{}, offset, size int, params []*Param, args ...interface{}) *page {
 	defer func() {
 		if re := recover(); re != nil {

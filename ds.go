@@ -2,20 +2,23 @@ package gobatis
 
 import "database/sql"
 
-//Define MultiDS type
-type MultiDS map[string]*DS
-
-//Define ds struct
-type DS struct {
-	Name   string //Named of DS
-	DSN    string //DSN for DS
-	db     *DB    //sql db
-	Config *DBConfig
+type multiDS struct {
+	mds    map[string]*DS
+	config *DBConfig
 }
 
-//Select ds
+// DS struct
+type DS struct {
+	// Named of DS
+	Name string
+	// DSN of DS
+	DSN string
+	db  *DB
+}
+
+// DS select
 func (m *mapper) DS(ds string) *mapper {
-	mds, have := m.multiDS[ds]
+	mds, have := m.multiDS.mds[ds]
 	if !have {
 		m.logger.Error("[Mapper]Choose DS[%s] fail: not registered", ds)
 		return m
@@ -25,21 +28,27 @@ func (m *mapper) DS(ds string) *mapper {
 	return m
 }
 
-//Get DS size
-func (m MultiDS) Size() int {
-	return len(m)
+// Size of MultiDS
+func (m *multiDS) Size() int {
+	return len(m.mds)
 }
 
-//Add datasource
-func (m MultiDS) Add(name, dsn string) *DS {
+// Add DS
+func (m *multiDS) Add(name, dsn string) *DS {
 	return m.AddWithDialect(name, dsn, MySQL)
 }
 
-//Add datasource with dialect
-func (m MultiDS) AddWithDialect(name, dsn string, dialect Dialect) *DS {
+// AddWithDialect add DS with dialect
+func (m *multiDS) AddWithDialect(name, dsn string, dialect Dialect) *DS {
 	db, err := sql.Open(string(dialect), dsn)
 	if err != nil {
 		panic(err)
+	}
+	if m.config != nil {
+		db.SetMaxOpenConns(m.config.MaxOpenConns)
+		db.SetMaxIdleConns(m.config.MaxIdleConns)
+		db.SetConnMaxLifetime(m.config.ConnMaxLifetime)
+		db.SetConnMaxIdleTime(m.config.ConnMaxIdleTime)
 	}
 	ds := &DS{
 		Name: name,
@@ -48,23 +57,22 @@ func (m MultiDS) AddWithDialect(name, dsn string, dialect Dialect) *DS {
 			db: db,
 		},
 	}
-	m[name] = ds
+	m.mds[name] = ds
 	return ds
 }
 
-//Get master ds
-func (m MultiDS) defaultDS() (string, *DS) {
-	if len(m) <= 0 {
+func (m *multiDS) defaultDS() (string, *DS) {
+	if len(m.mds) <= 0 {
 		panic("[MultiDS]MultiDS is empty")
 	}
-	mds, have := m["master"]
+	mds, have := m.mds["master"]
 	if have {
 		return "master", mds
 	}
 	ds := ""
-	for name := range m {
+	for name := range m.mds {
 		ds = name
 		break
 	}
-	return ds, m[ds]
+	return ds, m.mds[ds]
 }

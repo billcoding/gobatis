@@ -1,6 +1,5 @@
 package gobatis
 
-//Define page interface
 type page struct {
 	Offset    int           //The page offset
 	Size      int           //The page size

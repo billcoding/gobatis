@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 )
 
-//parse mapper file with xml
 func (b *Batis) parseMappers() *Batis {
 	for _, file := range b.mapperFiles {
 		bytes, err := ioutil.ReadFile(file)
@@ -33,7 +32,6 @@ func (b *Batis) parseMappers() *Batis {
 	return b
 }
 
-//Prepare mapper
 func (b *Batis) prepareMappers() {
 	for binding, node := range b.mapperNodes {
 		updateMappers := b.prepareUpdateMappers(binding, node.MapperUpdateNodes)

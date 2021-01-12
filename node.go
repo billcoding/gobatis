@@ -15,7 +15,6 @@ package gobatis
 
 import "encoding/xml"
 
-//Define mapper node struct
 type mapperNode struct {
 	XMLName           xml.Name           `xml:"batis-mapper"`
 	Binding           string             `xml:"binding,attr"`
@@ -23,14 +22,12 @@ type mapperNode struct {
 	MapperSelectNodes []mapperSelectNode `xml:"select"`
 }
 
-//Define update mapper node struct
 type mapperUpdateNode struct {
 	XMLName xml.Name `xml:"update"`
 	Id      string   `xml:"id,attr"`
 	Text    string   `xml:",cdata"`
 }
 
-//Define select mapperNode struct
 type mapperSelectNode struct {
 	XMLName xml.Name `xml:"select"`
 	Id      string   `xml:"id,attr"`

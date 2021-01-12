@@ -9,24 +9,31 @@ import (
 
 var batis *Batis
 
-//Define batis struct
+// Batis struct
 type Batis struct {
-	inited            bool                   //init done?
-	mutex             sync.Mutex             //mutex
-	Config            *Config                //config
-	Logger            *log                   //Logger
-	MultiDS           MultiDS                //multiple datasource
-	FuncMap           template.FuncMap       //Func Map
-	parsedMapperPaths []string               //parsed mapper path
-	mapperFiles       []string               //mapperNode files
-	mappers           map[string]*mapper     //mapper
-	mapperNodes       map[string]*mapperNode //mapper nodes
+	inited            bool
+	mutex             sync.Mutex
+	parsedMapperPaths []string
+	mapperFiles       []string
+	mappers           map[string]*mapper
+	mapperNodes       map[string]*mapperNode
+	// Config field
+	Config *Config
+	// Logger field
+	Logger *log
+	// MultiDS field
+	MultiDS *multiDS
+	// FuncMap field
+	FuncMap template.FuncMap
 }
 
-//new batis
 func newBatis() *Batis {
 	return &Batis{
-		mutex: sync.Mutex{},
+		mutex:             sync.Mutex{},
+		parsedMapperPaths: make([]string, 0),
+		mapperFiles:       make([]string, 0),
+		mappers:           make(map[string]*mapper, 0),
+		mapperNodes:       make(map[string]*mapperNode, 0),
 		Config: &Config{
 			AutoScan:    true,
 			PrintSql:    false,
@@ -36,31 +43,33 @@ func newBatis() *Batis {
 			ologger: l.New(os.Stdout, "[GOBATIS]", l.LstdFlags),
 			elogger: l.New(os.Stdout, "[GOBATIS]", l.LstdFlags),
 		},
-		MultiDS:           make(map[string]*DS, 0),
-		FuncMap:           make(map[string]interface{}, 0),
-		parsedMapperPaths: make([]string, 0),
-		mapperFiles:       make([]string, 0),
-		mappers:           make(map[string]*mapper, 0),
-		mapperNodes:       make(map[string]*mapperNode, 0),
+		MultiDS: &multiDS{
+			mds: make(map[string]*DS, 0),
+			config: &DBConfig{
+				MaxIdleConns:    2,
+				MaxOpenConns:    10,
+				ConnMaxLifetime: 10,
+			},
+		},
+		FuncMap: make(map[string]interface{}, 0),
 	}
 }
 
-//New batis
 func init() {
 	batis = newBatis()
 }
 
-//Return batis
+// Default return default Batis
 func Default() *Batis {
 	return batis
 }
 
-//Return new batis
+// New return new Batis
 func New() *Batis {
 	return newBatis()
 }
 
-//Init batis
+// Init Batis
 func (b *Batis) Init() *Batis {
 	b.parseEnv()
 	b.parseMapperPaths()
@@ -69,7 +78,6 @@ func (b *Batis) Init() *Batis {
 	return b
 }
 
-//Start scan mapper file for binding
 func (b *Batis) scanMapper() *Batis {
 	if !b.Config.AutoScan {
 		return b
@@ -79,21 +87,19 @@ func (b *Batis) scanMapper() *Batis {
 	}
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
-	//collect mapperNode files
+	// collect mapperNode files
 	for _, mapperPath := range b.parsedMapperPaths {
 		b.Logger.Info("[Mapper]scan mapper files : %v", mapperPath)
 		for _, mf := range getMapperFiles(mapperPath) {
 			b.mapperFiles = append(b.mapperFiles, mf)
 		}
 	}
-	//parse mapper
 	b.parseMappers()
-	//prepare mapper
 	b.prepareMappers()
 	return b
 }
 
-//Get mapper
+// Mapper return cached mapper
 func (b *Batis) Mapper(binding string) *mapper {
 	mapper, have := b.mappers[binding]
 	if !have {
@@ -107,13 +113,12 @@ func (b *Batis) Mapper(binding string) *mapper {
 	return mapper
 }
 
-//Set mapper path
+// MapperPaths set mapper path
 func (b *Batis) MapperPaths(mapperPaths ...string) *Batis {
 	b.Config.MapperPaths = mapperPaths
 	return b
 }
 
-//Parse mapper paths
 func (b *Batis) parseMapperPaths() *Batis {
 	for _, mapperPath := range b.Config.MapperPaths {
 		b.parsedMapperPaths = append(b.parsedMapperPaths, mapperPath)

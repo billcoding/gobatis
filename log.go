@@ -5,23 +5,23 @@ import (
 	l "log"
 )
 
-//Define log struct
+// log struct
 type log struct {
 	ologger *l.Logger
 	elogger *l.Logger
 }
 
-//Info level
+// Info level
 func (l *log) Info(message string, args ...interface{}) {
 	l.ologger.Println(fmt.Sprintf(message, args...))
 }
 
-//Warn level
+// Warn level
 func (l *log) Warn(message string, args ...interface{}) {
 	l.ologger.Println(fmt.Sprintf(message, args...))
 }
 
-//Error level
+// Error level
 func (l *log) Error(message string, args ...interface{}) {
 	l.elogger.Println(fmt.Sprintf(message, args...))
 }

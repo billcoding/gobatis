@@ -2,7 +2,7 @@ package gobatis
 
 import "encoding/xml"
 
-//Add raw xml
+// AddRaw add raw xml
 func (b *Batis) AddRaw(rawXML string) *Batis {
 	node := mapperNode{}
 	err := xml.Unmarshal([]byte(rawXML), &node)

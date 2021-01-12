@@ -1,6 +1,6 @@
 package gobatis
 
-//Define Helper struct
+// Helper struct
 type Helper struct {
 	batis   *Batis //Bundle batis
 	binding string //XML binding
@@ -8,12 +8,12 @@ type Helper struct {
 	ds      string //DS
 }
 
-//Return new helper
+// NewHelper return new helper
 func NewHelper(binding, id string) *Helper {
 	return NewHelperWithDS(binding, id, "")
 }
 
-//Return new helper with DS
+// NewHelperWithDS return new helper with DS
 func NewHelperWithDS(binding, id, ds string) *Helper {
 	b := Default()
 	if !b.inited {
@@ -27,12 +27,12 @@ func NewHelperWithDS(binding, id, ds string) *Helper {
 	}
 }
 
-//Return query
+// Select return query
 func (h *Helper) Select() *selectMapper {
 	return h.batis.Mapper(h.binding).SelectWithDS(h.id, h.ds)
 }
 
-//Return update
+// Update return update
 func (h *Helper) Update() *updateMapper {
 	return h.batis.Mapper(h.binding).UpdateWithDS(h.id, h.ds)
 }

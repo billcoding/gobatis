@@ -1,8 +1,31 @@
 package gobatis
 
-//Define Config struct
+import "time"
+
+// Config struct
 type Config struct {
-	AutoScan    bool     //Auto scan mappers
-	PrintSql    bool     //Print sql
-	MapperPaths []string //Mapper Paths
+	// AutoScan field
+	AutoScan bool
+	// PrintSql field
+	PrintSql bool
+	// MapperPaths field
+	MapperPaths []string
+}
+
+// DBConfig struct
+type DBConfig struct {
+	// MaxOpenConns field
+	MaxOpenConns int
+	// MaxIdleConns field
+	MaxIdleConns int
+	// ConnMaxLifetime field
+	ConnMaxLifetime time.Duration
+	// ConnMaxIdleTime field
+	ConnMaxIdleTime time.Duration
+}
+
+// DBConfig config
+func (b *Batis) DBConfig(config *DBConfig) *Batis {
+	b.MultiDS.config = config
+	return b
 }

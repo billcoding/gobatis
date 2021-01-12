@@ -2,13 +2,12 @@ package gobatis
 
 import "database/sql"
 
-//Define sqlQuery struct
 type sqlQuery struct {
 	db  *DB
 	sql string
 }
 
-//Return sql query from batis
+// SqlQuery return sql query from batis
 func (b *Batis) SqlQuery(sql string) *sqlQuery {
 	_, DS := b.MultiDS.defaultDS()
 	return &sqlQuery{
@@ -17,7 +16,7 @@ func (b *Batis) SqlQuery(sql string) *sqlQuery {
 	}
 }
 
-//Return sql query from mapper
+// SqlQuery return sql query from mapper
 func (m *mapper) SqlQuery(sql string) *sqlQuery {
 	return &sqlQuery{
 		db:  m.currentDS.db,
@@ -25,12 +24,12 @@ func (m *mapper) SqlQuery(sql string) *sqlQuery {
 	}
 }
 
-//Query
+// Query query
 func (s *sqlQuery) Query(args ...interface{}) (*sql.Rows, error) {
 	return s.db.db.Query(s.sql, args...)
 }
 
-//Exec
+// Exec exec
 func (s *sqlQuery) Exec(args ...interface{}) (sql.Result, error) {
 	return s.db.db.Exec(s.sql, args...)
 }

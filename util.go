@@ -8,7 +8,6 @@ import (
 	"text/template"
 )
 
-//Get mapperNode files
 func getMapperFiles(dir ...string) []string {
 	var mapperFiles []string
 	for _, mapperPath := range dir {
@@ -31,7 +30,6 @@ func getMapperFiles(dir ...string) []string {
 	return mapperFiles
 }
 
-//Prepare stmt
 func replaceParams(sql string, params ...*Param) string {
 	replacedSql := sql
 	if params != nil && len(params) > 0 {

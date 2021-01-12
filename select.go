@@ -7,7 +7,6 @@ import (
 	"text/template"
 )
 
-//Define select mapper struct
 type selectMapper struct {
 	gfuncMap    *template.FuncMap
 	logger      *log   //logger
@@ -20,12 +19,12 @@ type selectMapper struct {
 	extraSql    string //extra sql
 }
 
-//Prepare using text/template
+// Prepare using text/template
 func (m *selectMapper) Prepare(data interface{}) *selectMapper {
 	return m.PrepareWithFunc(data, nil)
 }
 
-//Prepare using text/template with func
+// PrepareWithFunc using text/template with func
 func (m *selectMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMap) *selectMapper {
 	defer func() {
 		if re := recover(); re != nil {
@@ -49,17 +48,17 @@ func (m *selectMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMa
 	return m
 }
 
-//Select exec
+// Exec select exec
 func (m *selectMapper) Exec(args ...interface{}) *selectCall {
 	return m.ExecWithParamsArgs(nil, args...)
 }
 
-//Select exec with params
+// ExecWithParams select exec with params
 func (m *selectMapper) ExecWithParams(params ...*Param) *selectCall {
 	return m.ExecWithParamsArgs(params)
 }
 
-//Select exec with args and named params
+// ExecWithParamsArgs select exec with args and named params
 func (m *selectMapper) ExecWithParamsArgs(params []*Param, args ...interface{}) *selectCall {
 	defer func() {
 		if re := recover(); re != nil {
@@ -92,12 +91,10 @@ func (m *selectMapper) ExecWithParamsArgs(params []*Param, args ...interface{}) 
 	}
 }
 
-//Replace named params
 func (m *selectMapper) replaceParams(params ...*Param) {
 	m.sql = replaceParams(m.originalSql, params...)
 }
 
-//Query on db
 func (m *selectMapper) queryCountByDB(args ...interface{}) int {
 	defer func() {
 		if re := recover(); re != nil {
@@ -130,7 +127,6 @@ func (m *selectMapper) queryCountByDB(args ...interface{}) int {
 	return c
 }
 
-//Query on db
 func (m *selectMapper) queryByDB(args ...interface{}) (*sql.Rows, error) {
 	defer func() {
 		if re := recover(); re != nil {
