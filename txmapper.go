@@ -6,7 +6,7 @@ type txMapper struct {
 }
 
 // Update get update mapper
-func (mapper *txMapper) Update(id string) *updateMapper {
+func (mapper *txMapper) Update(id string) *UpdateMapper {
 	updateMapper := mapper.mapper.Update(id)
 	if updateMapper != nil {
 		updateMapper.tx = mapper.tx

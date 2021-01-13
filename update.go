@@ -6,7 +6,7 @@ import (
 	"text/template"
 )
 
-type updateMapper struct {
+type UpdateMapper struct {
 	gfuncMap     *template.FuncMap
 	printSql     bool   //print sql
 	logger       *log   //logger
@@ -21,22 +21,22 @@ type updateMapper struct {
 }
 
 // AffectedRows get affectedRows
-func (m *updateMapper) AffectedRows() int64 {
+func (m *UpdateMapper) AffectedRows() int64 {
 	return m.affectedRows
 }
 
 // InsertedId get insertedId
-func (m *updateMapper) InsertedId() int64 {
+func (m *UpdateMapper) InsertedId() int64 {
 	return m.insertedId
 }
 
 // Prepare using text/template
-func (m *updateMapper) Prepare(data interface{}) *updateMapper {
+func (m *UpdateMapper) Prepare(data interface{}) *UpdateMapper {
 	return m.PrepareWithFunc(data, nil)
 }
 
 // PrepareWithFunc using text/template
-func (m *updateMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMap) *updateMapper {
+func (m *UpdateMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMap) *UpdateMapper {
 	var t *template.Template
 	gfuncMap := joinFuncMap(*m.gfuncMap, funcMap)
 	if len(gfuncMap) <= 0 {
@@ -55,17 +55,17 @@ func (m *updateMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMa
 }
 
 // Exec update exec
-func (m *updateMapper) Exec(args ...interface{}) error {
+func (m *UpdateMapper) Exec(args ...interface{}) error {
 	return m.ExecWithParamsArgs(nil, args...)
 }
 
 // ExecWithParams update exec with named params
-func (m *updateMapper) ExecWithParams(params ...*Param) error {
+func (m *UpdateMapper) ExecWithParams(params ...*Param) error {
 	return m.ExecWithParamsArgs(params)
 }
 
 //ExecWithParamsArgs update exec with named params
-func (m *updateMapper) ExecWithParamsArgs(params []*Param, args ...interface{}) error {
+func (m *UpdateMapper) ExecWithParamsArgs(params []*Param, args ...interface{}) error {
 	var result sql.Result
 	var err error
 
@@ -98,11 +98,11 @@ func (m *updateMapper) ExecWithParamsArgs(params []*Param, args ...interface{}) 
 	return nil
 }
 
-func (m *updateMapper) replaceParams(params ...*Param) {
+func (m *UpdateMapper) replaceParams(params ...*Param) {
 	m.sql = replaceParams(m.originalSql, params...)
 }
 
-func (m *updateMapper) updateByTx(args ...interface{}) (sql.Result, error) {
+func (m *UpdateMapper) updateByTx(args ...interface{}) (sql.Result, error) {
 	defer func() {
 		if re := recover(); re != nil {
 			m.logger.Error("%v", re)
@@ -125,7 +125,7 @@ func (m *updateMapper) updateByTx(args ...interface{}) (sql.Result, error) {
 	}
 }
 
-func (m *updateMapper) updateByDB(args ...interface{}) (sql.Result, error) {
+func (m *UpdateMapper) updateByDB(args ...interface{}) (sql.Result, error) {
 	defer func() {
 		if re := recover(); re != nil {
 			m.logger.Error("%v", re)

@@ -6,7 +6,7 @@ import (
 )
 
 type selectCall struct {
-	sm     *selectMapper //The select mapper
+	sm     *SelectMapper //The select mapper
 	args   []interface{} //The args
 	logger *log          //The logger
 	rows   *sql.Rows     //The rows

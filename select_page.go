@@ -6,17 +6,17 @@ import (
 )
 
 // Page select page
-func (m *selectMapper) Page(rptr interface{}, offset, size int, args ...interface{}) *page {
+func (m *SelectMapper) Page(rptr interface{}, offset, size int, args ...interface{}) *page {
 	return m.PageWithParamsArgs(rptr, offset, size, nil, args...)
 }
 
 // PageWithParams select exec with params
-func (m *selectMapper) PageWithParams(rptr interface{}, offset, size int, params ...*Param) *page {
+func (m *SelectMapper) PageWithParams(rptr interface{}, offset, size int, params ...*Param) *page {
 	return m.PageWithParamsArgs(rptr, offset, size, params)
 }
 
 // PageWithParamsArgs select exec with args and named params
-func (m *selectMapper) PageWithParamsArgs(rptr interface{}, offset, size int, params []*Param, args ...interface{}) *page {
+func (m *SelectMapper) PageWithParamsArgs(rptr interface{}, offset, size int, params []*Param, args ...interface{}) *page {
 	defer func() {
 		if re := recover(); re != nil {
 			m.logger.Error("%v", re)

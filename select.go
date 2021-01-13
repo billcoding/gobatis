@@ -7,7 +7,7 @@ import (
 	"text/template"
 )
 
-type selectMapper struct {
+type SelectMapper struct {
 	gfuncMap    *template.FuncMap
 	logger      *log   //logger
 	printSql    bool   //print sql
@@ -20,12 +20,12 @@ type selectMapper struct {
 }
 
 // Prepare using text/template
-func (m *selectMapper) Prepare(data interface{}) *selectMapper {
+func (m *SelectMapper) Prepare(data interface{}) *SelectMapper {
 	return m.PrepareWithFunc(data, nil)
 }
 
 // PrepareWithFunc using text/template with func
-func (m *selectMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMap) *selectMapper {
+func (m *SelectMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMap) *SelectMapper {
 	defer func() {
 		if re := recover(); re != nil {
 			m.logger.Error("%v", re)
@@ -49,17 +49,17 @@ func (m *selectMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMa
 }
 
 // Exec select exec
-func (m *selectMapper) Exec(args ...interface{}) *selectCall {
+func (m *SelectMapper) Exec(args ...interface{}) *selectCall {
 	return m.ExecWithParamsArgs(nil, args...)
 }
 
 // ExecWithParams select exec with params
-func (m *selectMapper) ExecWithParams(params ...*Param) *selectCall {
+func (m *SelectMapper) ExecWithParams(params ...*Param) *selectCall {
 	return m.ExecWithParamsArgs(params)
 }
 
 // ExecWithParamsArgs select exec with args and named params
-func (m *selectMapper) ExecWithParamsArgs(params []*Param, args ...interface{}) *selectCall {
+func (m *SelectMapper) ExecWithParamsArgs(params []*Param, args ...interface{}) *selectCall {
 	defer func() {
 		if re := recover(); re != nil {
 			m.logger.Error("%v", re)
@@ -91,11 +91,11 @@ func (m *selectMapper) ExecWithParamsArgs(params []*Param, args ...interface{}) 
 	}
 }
 
-func (m *selectMapper) replaceParams(params ...*Param) {
+func (m *SelectMapper) replaceParams(params ...*Param) {
 	m.sql = replaceParams(m.originalSql, params...)
 }
 
-func (m *selectMapper) queryCountByDB(args ...interface{}) int {
+func (m *SelectMapper) queryCountByDB(args ...interface{}) int {
 	defer func() {
 		if re := recover(); re != nil {
 			m.logger.Error("%v", re)
@@ -127,7 +127,7 @@ func (m *selectMapper) queryCountByDB(args ...interface{}) int {
 	return c
 }
 
-func (m *selectMapper) queryByDB(args ...interface{}) (*sql.Rows, error) {
+func (m *SelectMapper) queryByDB(args ...interface{}) (*sql.Rows, error) {
 	defer func() {
 		if re := recover(); re != nil {
 			m.logger.Error("%v", re)

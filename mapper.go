@@ -7,17 +7,17 @@ type mapper struct {
 	currentDSName string
 	currentDS     *DS
 	multiDS       *multiDS
-	updateMappers map[string]*updateMapper
-	selectMappers map[string]*selectMapper
+	updateMappers map[string]*UpdateMapper
+	selectMappers map[string]*SelectMapper
 }
 
 // Select get select mapper
-func (m *mapper) Select(id string) *selectMapper {
+func (m *mapper) Select(id string) *SelectMapper {
 	return m.SelectWithDS(id, "")
 }
 
 // SelectWithDS select mapper with ds
-func (m *mapper) SelectWithDS(id, ds string) *selectMapper {
+func (m *mapper) SelectWithDS(id, ds string) *SelectMapper {
 	selectMapper, have := m.selectMappers[id]
 	if !have {
 		m.logger.Error("no select node : %v", id)
@@ -42,12 +42,12 @@ func (m *mapper) SelectWithDS(id, ds string) *selectMapper {
 }
 
 // Update get update mapper
-func (m *mapper) Update(id string) *updateMapper {
+func (m *mapper) Update(id string) *UpdateMapper {
 	return m.UpdateWithDS(id, "")
 }
 
 // UpdateWithDS get update mapper with ds
-func (m *mapper) UpdateWithDS(id, ds string) *updateMapper {
+func (m *mapper) UpdateWithDS(id, ds string) *UpdateMapper {
 	updateMapper, have := m.updateMappers[id]
 	if !have {
 		m.logger.Error("no update node : %v", id)

@@ -49,8 +49,8 @@ func (b *Batis) prepareMappers() {
 	}
 }
 
-func (b *Batis) prepareUpdateMappers(binding string, mapperUpdateNodes []mapperUpdateNode) map[string]*updateMapper {
-	updateMapperMap := make(map[string]*updateMapper, 0)
+func (b *Batis) prepareUpdateMappers(binding string, mapperUpdateNodes []mapperUpdateNode) map[string]*UpdateMapper {
+	updateMapperMap := make(map[string]*UpdateMapper, 0)
 	if mapperUpdateNodes != nil {
 		for _, node := range mapperUpdateNodes {
 			id := node.Id
@@ -59,7 +59,7 @@ func (b *Batis) prepareUpdateMappers(binding string, mapperUpdateNodes []mapperU
 				b.Logger.Warn("[Mapper]node sql is empty : %v", id)
 				continue
 			}
-			updateMapperMap[id] = &updateMapper{
+			updateMapperMap[id] = &UpdateMapper{
 				gfuncMap:    &b.FuncMap,
 				printSql:    b.Config.PrintSql,
 				logger:      b.Logger,
@@ -73,8 +73,8 @@ func (b *Batis) prepareUpdateMappers(binding string, mapperUpdateNodes []mapperU
 	return updateMapperMap
 }
 
-func (b *Batis) prepareSelectMappers(binding string, mapperSelectNodes []mapperSelectNode) map[string]*selectMapper {
-	selectMapperMap := make(map[string]*selectMapper, 0)
+func (b *Batis) prepareSelectMappers(binding string, mapperSelectNodes []mapperSelectNode) map[string]*SelectMapper {
+	selectMapperMap := make(map[string]*SelectMapper, 0)
 	if mapperSelectNodes != nil {
 		for _, node := range mapperSelectNodes {
 			id := node.Id
@@ -83,7 +83,7 @@ func (b *Batis) prepareSelectMappers(binding string, mapperSelectNodes []mapperS
 				b.Logger.Warn("[Mapper]node sql is empty : %v", id)
 				continue
 			}
-			selectMapperMap[id] = &selectMapper{
+			selectMapperMap[id] = &SelectMapper{
 				gfuncMap:    &b.FuncMap,
 				logger:      b.Logger,
 				printSql:    b.Config.PrintSql,
