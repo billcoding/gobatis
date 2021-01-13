@@ -15,12 +15,18 @@ func NewHelper(binding, id string) *Helper {
 
 // NewHelperWithDS return new helper with DS
 func NewHelperWithDS(binding, id, ds string) *Helper {
-	b := Default()
-	if !b.inited {
-		panic("The batis not yet initialized")
-	}
+	return NewHelperWithBatisAndDS(Default(), binding, id, ds)
+}
+
+// NewHelperWithBatis return new helper with DS
+func NewHelperWithBatis(batis *Batis, binding, id string) *Helper {
+	return NewHelperWithBatisAndDS(batis, binding, id, "")
+}
+
+// NewHelperWithBatisAndDS return new helper with DS
+func NewHelperWithBatisAndDS(batis *Batis, binding, id, ds string) *Helper {
 	return &Helper{
-		batis:   b,
+		batis:   batis,
 		binding: binding,
 		id:      id,
 		ds:      ds,
@@ -28,11 +34,11 @@ func NewHelperWithDS(binding, id, ds string) *Helper {
 }
 
 // Select return query
-func (h *Helper) Select() *selectMapper {
+func (h *Helper) Select() *SelectMapper {
 	return h.batis.Mapper(h.binding).SelectWithDS(h.id, h.ds)
 }
 
 // Update return update
-func (h *Helper) Update() *updateMapper {
+func (h *Helper) Update() *UpdateMapper {
 	return h.batis.Mapper(h.binding).UpdateWithDS(h.id, h.ds)
 }
