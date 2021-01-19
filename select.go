@@ -9,14 +9,14 @@ import (
 
 type SelectMapper struct {
 	gfuncMap    *template.FuncMap
-	logger      *log   //logger
-	printSql    bool   //print sql
-	binding     string //binding key
-	id          string //id
-	db          *DB    //db
-	originalSql string //original sql
-	sql         string //sql
-	extraSql    string //extra sql
+	logger      *log
+	printSql    bool
+	binding     string
+	id          string
+	db          *DB
+	originalSql string
+	sql         string
+	extraSql    string
 }
 
 // Prepare using text/template
@@ -80,7 +80,7 @@ func (m *SelectMapper) ExecWithParamsArgs(params []*Param, args ...interface{}) 
 	}
 
 	if err != nil {
-		return nil
+		return &selectCall{err: err}
 	}
 
 	return &selectCall{

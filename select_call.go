@@ -6,11 +6,12 @@ import (
 )
 
 type selectCall struct {
-	sm     *SelectMapper //The select mapper
-	args   []interface{} //The args
-	logger *log          //The logger
-	rows   *sql.Rows     //The rows
-	rptr   interface{}   //The return type ptr
+	sm     *SelectMapper
+	args   []interface{}
+	logger *log
+	err    error
+	rows   *sql.Rows
+	rptr   interface{}
 }
 
 // Scan rows to dists
