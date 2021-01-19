@@ -49,13 +49,10 @@ func (m *SelectMapper) PageWithParamsArgs(rptr interface{}, offset, size int, pa
 		m.logger.Info("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, args)
 	}
 
-	if totalRows > 0 {
+	if totalRows > 0 && offset >= 0 && offset <= totalRows-1 {
 		page.TotalRows = totalRows
 		page.TotalPage = int(math.Ceil(float64(totalRows) / float64(size)))
-	}
-
-	//valid range
-	if offset >= 0 && offset <= page.TotalRows-1 {
+		// valid range
 		m.extraSql = fmt.Sprintf(" limit %d,%d", offset, size)
 		page.List = m.Exec(args...).List(rptr)
 		m.extraSql = ""
