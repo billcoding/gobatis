@@ -3,6 +3,7 @@ package gobatis
 import (
 	"database/sql"
 	"reflect"
+	"strconv"
 )
 
 type selectCall struct {
@@ -111,7 +112,7 @@ func (c *selectCall) List(rptr interface{}) []interface{} {
 }
 
 // MapList get map rows
-func (c *selectCall) MapList() []map[string]string {
+func (c *selectCall) MapList() []map[string]interface{} {
 	defer func() {
 		if re := recover(); re != nil {
 			c.logger.Error("%v", re)
@@ -193,13 +194,13 @@ func (c *selectCall) scanStruct() []interface{} {
 	return list
 }
 
-func (c *selectCall) scanMap() []map[string]string {
+func (c *selectCall) scanMap() []map[string]interface{} {
 	defer func() {
 		if re := recover(); re != nil {
 			c.logger.Error("%v", re)
 		}
 	}()
-	list := make([]map[string]string, 0)
+	list := make([]map[string]interface{}, 0)
 	columns, _ := c.rows.Columns()
 	//release conn
 	defer func() {
@@ -209,7 +210,7 @@ func (c *selectCall) scanMap() []map[string]string {
 		}
 	}()
 	for c.rows.Next() {
-		m := make(map[string]string, 0)
+		m := make(map[string]interface{}, 0)
 		addrs := make([]interface{}, len(columns))
 		for i := range columns {
 			var obj string
@@ -220,7 +221,14 @@ func (c *selectCall) scanMap() []map[string]string {
 			c.logger.Error("%v", err)
 		}
 		for i, column := range columns {
-			m[column] = *(addrs[i].(*string))
+			// TODO supports more types
+			v := *(addrs[i].(*string))
+			fv, ferr := strconv.ParseFloat(v, 64)
+			if ferr == nil {
+				m[column] = fv
+			} else {
+				m[column] = v
+			}
 		}
 		list = append(list, m)
 	}
