@@ -2,16 +2,16 @@ package gobatis
 
 import "database/sql"
 
-// Tx struct
-type Tx struct {
+// TX struct
+type TX struct {
 	db *sql.DB //built in db
 	tx *sql.Tx //built in tx
 }
 
-func (tx *Tx) commit() error {
+func (tx *TX) commit() error {
 	return tx.tx.Commit()
 }
 
-func (tx *Tx) rollback() error {
+func (tx *TX) rollback() error {
 	return tx.tx.Rollback()
 }

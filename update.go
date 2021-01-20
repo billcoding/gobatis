@@ -12,7 +12,7 @@ type UpdateMapper struct {
 	logger       *log   //logger
 	binding      string //binding key
 	id           string //id
-	tx           *Tx    //sql tx
+	tx           *TX    //sql tx
 	db           *DB    //sql db
 	originalSql  string //original sql
 	sql          string //sql

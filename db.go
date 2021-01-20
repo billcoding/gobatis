@@ -10,12 +10,12 @@ type DB struct {
 }
 
 // Begin a tx
-func (db *DB) Begin() *Tx {
+func (db *DB) Begin() *TX {
 	tx, err := db.db.Begin()
 	if err != nil {
 		return nil
 	}
-	return &Tx{
+	return &TX{
 		db: db.db,
 		tx: tx,
 	}
