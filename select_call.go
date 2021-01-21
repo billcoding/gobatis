@@ -221,18 +221,28 @@ func (c *selectCall) scanMap() []map[string]interface{} {
 			c.logger.Error("%v", err)
 		}
 		for i, column := range columns {
-			// TODO supports more types
-			v := *(addrs[i].(*string))
-			fv, ferr := strconv.ParseFloat(v, 64)
-			if ferr == nil {
-				m[column] = fv
-			} else {
-				m[column] = v
-			}
+			m[column] = getInterfaceVal(*(addrs[i].(*string)))
 		}
 		list = append(list, m)
 	}
 	return list
+}
+
+// TODO supports more types
+func getInterfaceVal(val string) interface{} {
+	// int64
+	ival, err := strconv.ParseInt(val, 10, 64)
+	if err == nil {
+		return ival
+	}
+
+	// float64
+	fval, err := strconv.ParseFloat(val, 64)
+	if err == nil {
+		return fval
+	}
+
+	return val
 }
 
 func (c *selectCall) getFieldMap() map[string]string {
