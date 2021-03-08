@@ -7,21 +7,21 @@ import (
 
 // log struct
 type log struct {
-	ologger *l.Logger
-	elogger *l.Logger
+	outLogger *l.Logger
+	errLogger *l.Logger
 }
 
 // Info level
 func (l *log) Info(message string, args ...interface{}) {
-	l.ologger.Println(fmt.Sprintf(message, args...))
+	l.outLogger.Println(fmt.Sprintf(message, args...))
 }
 
 // Warn level
 func (l *log) Warn(message string, args ...interface{}) {
-	l.ologger.Println(fmt.Sprintf(message, args...))
+	l.outLogger.Println(fmt.Sprintf(message, args...))
 }
 
 // Error level
 func (l *log) Error(message string, args ...interface{}) {
-	l.elogger.Println(fmt.Sprintf(message, args...))
+	l.errLogger.Println(fmt.Sprintf(message, args...))
 }

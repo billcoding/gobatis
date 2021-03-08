@@ -40,8 +40,8 @@ func newBatis() *Batis {
 			MapperPaths: []string{"./mapper"},
 		},
 		Logger: &log{
-			ologger: l.New(os.Stdout, "[GOBATIS]", l.LstdFlags),
-			elogger: l.New(os.Stdout, "[GOBATIS]", l.LstdFlags),
+			outLogger: l.New(os.Stdout, "[GOBATIS]", l.LstdFlags),
+			errLogger: l.New(os.Stdout, "[GOBATIS]", l.LstdFlags),
 		},
 		MultiDS: &multiDS{
 			mds: make(map[string]*DS, 0),
@@ -101,16 +101,15 @@ func (b *Batis) scanMapper() *Batis {
 
 // Mapper return cached mapper
 func (b *Batis) Mapper(binding string) *mapper {
-	mapper, have := b.mappers[binding]
+	mp, have := b.mappers[binding]
 	if !have {
 		b.Logger.Error("[Mapper]no binding : %v", binding)
 		return nil
 	}
-
 	_, mds := b.MultiDS.defaultDS()
-	mapper.currentDS = mds
-	mapper.printSql = b.Config.PrintSql
-	return mapper
+	mp.currentDS = mds
+	mp.printSql = b.Config.PrintSql
+	return mp
 }
 
 // MapperPaths set mapper path
