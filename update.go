@@ -8,15 +8,16 @@ import (
 
 type UpdateMapper struct {
 	gfuncMap     *template.FuncMap
-	printSql     bool   //print sql
-	logger       *log   //logger
-	binding      string //binding key
-	id           string //id
-	db           *DB    //sql db
-	originalSql  string //original sql
-	sql          string //sql
-	affectedRows int64  //affected rows
-	insertedId   int64  //inserted id
+	printSql     bool
+	logger       *log
+	binding      string
+	id           string
+	db           *DB
+	originalSql  string
+	sql          string
+	affectedRows int64
+	insertedId   int64
+	args         []interface{}
 }
 
 // AffectedRows get affectedRows
@@ -53,27 +54,25 @@ func (m *UpdateMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMa
 	return m
 }
 
+// Params set params
+func (m *UpdateMapper) Params(params ...*Param) *UpdateMapper {
+	m.sql = replaceParams(m.originalSql, params...)
+	return m
+}
+
+// Args set args
+func (m *UpdateMapper) Args(args ...interface{}) *UpdateMapper {
+	m.args = args
+	return m
+}
+
 // Exec update exec
-func (m *UpdateMapper) Exec(args ...interface{}) error {
-	return m.ExecWithParamsArgs(nil, args...)
-}
-
-// ExecWithParams update exec with named params
-func (m *UpdateMapper) ExecWithParams(params ...*Param) error {
-	return m.ExecWithParamsArgs(params)
-}
-
-//ExecWithParamsArgs update exec with named params
-func (m *UpdateMapper) ExecWithParamsArgs(params []*Param, args ...interface{}) error {
+func (m *UpdateMapper) Exec() error {
 	var result sql.Result
 	var err error
-	if params != nil {
-		//replace namedParam
-		m.replaceParams(params...)
-	}
-	result, err = m.updateByDB(args...)
+	result, err = m.updateByDB()
 	if m.printSql {
-		m.logger.Info("[SQL]binding[%s] update[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, args)
+		m.logger.Info("[SQL]binding[%s] update[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, m.args)
 	}
 	if err != nil {
 		return err
@@ -87,41 +86,37 @@ func (m *UpdateMapper) ExecWithParamsArgs(params []*Param, args ...interface{}) 
 	return nil
 }
 
-func (m *UpdateMapper) replaceParams(params ...*Param) {
-	m.sql = replaceParams(m.originalSql, params...)
-}
-
-func (m *UpdateMapper) updateByTx(tx *sql.Tx, args ...interface{}) (sql.Result, error) {
-	if args != nil && len(args) > 0 {
-		result, err := tx.Exec(m.sql, args...)
+func (m *UpdateMapper) updateByTx(tx *sql.Tx) (sql.Result, error) {
+	if m.args != nil && len(m.args) > 0 {
+		result, err := tx.Exec(m.sql, m.args...)
 		if err != nil {
 			m.logger.Error("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
-			return nil, err
+			panic(err)
 		}
 		return result, nil
 	} else {
 		result, err := tx.Exec(m.sql)
 		if err != nil {
 			m.logger.Error("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
-			return nil, err
+			panic(err)
 		}
 		return result, nil
 	}
 }
 
-func (m *UpdateMapper) updateByDB(args ...interface{}) (sql.Result, error) {
-	if args != nil && len(args) > 0 {
-		result, err := m.db.db.Exec(m.sql, args...)
+func (m *UpdateMapper) updateByDB() (sql.Result, error) {
+	if m.args != nil && len(m.args) > 0 {
+		result, err := m.db.db.Exec(m.sql, m.args...)
 		if err != nil {
 			m.logger.Error("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
-			return nil, err
+			panic(err)
 		}
 		return result, nil
 	} else {
 		result, err := m.db.db.Exec(m.sql)
 		if err != nil {
 			m.logger.Error("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
-			return nil, err
+			panic(err)
 		}
 		return result, nil
 	}

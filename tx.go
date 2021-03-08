@@ -24,19 +24,8 @@ func (b *Batis) Begin() *TX {
 	}
 }
 
-func (tx *TX) Update(m *UpdateMapper, args ...interface{}) {
-	tx.UpdateWithParamsArgs(m, nil, args...)
-}
-
-func (tx *TX) UpdateWithParams(m *UpdateMapper, params ...*Param) {
-	tx.UpdateWithParamsArgs(m, params)
-}
-
-func (tx *TX) UpdateWithParamsArgs(m *UpdateMapper, params []*Param, args ...interface{}) {
-	if params != nil && len(params) > 0 {
-		m.replaceParams(params...)
-	}
-	result, err := m.updateByTx(tx.tx, args...)
+func (tx *TX) Update(m *UpdateMapper) {
+	result, err := m.updateByTx(tx.tx)
 	if err != nil {
 		panic(err)
 	}

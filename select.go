@@ -17,6 +17,7 @@ type SelectMapper struct {
 	originalSql string
 	sql         string
 	extraSql    string
+	args        []interface{}
 }
 
 // Prepare using text/template
@@ -26,11 +27,6 @@ func (m *SelectMapper) Prepare(data interface{}) *SelectMapper {
 
 // PrepareWithFunc using text/template with func
 func (m *SelectMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMap) *SelectMapper {
-	defer func() {
-		if re := recover(); re != nil {
-			m.logger.Error("%v", re)
-		}
-	}()
 	var t *template.Template
 	gfuncMap := joinFuncMap(*m.gfuncMap, funcMap)
 	if len(gfuncMap) <= 0 {
@@ -48,103 +44,77 @@ func (m *SelectMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMa
 	return m
 }
 
+// Args set args
+func (m *SelectMapper) Args(args ...interface{}) *SelectMapper {
+	m.args = args
+	return m
+}
+
+// Params set params
+func (m *SelectMapper) Params(params ...*Param) *SelectMapper {
+	m.sql = replaceParams(m.originalSql, params...)
+	return m
+}
+
 // Exec select exec
-func (m *SelectMapper) Exec(args ...interface{}) *selectCall {
-	return m.ExecWithParamsArgs(nil, args...)
-}
-
-// ExecWithParams select exec with params
-func (m *SelectMapper) ExecWithParams(params ...*Param) *selectCall {
-	return m.ExecWithParamsArgs(params)
-}
-
-// ExecWithParamsArgs select exec with args and named params
-func (m *SelectMapper) ExecWithParamsArgs(params []*Param, args ...interface{}) *selectCall {
-	defer func() {
-		if re := recover(); re != nil {
-			m.logger.Error("%v", re)
-		}
-	}()
+func (m *SelectMapper) Exec() *selectCall {
 	var rows *sql.Rows
 	var err error
-
-	if params != nil {
-		//replace namedParam
-		m.replaceParams(params...)
-	}
-
-	rows, err = m.queryByDB(args...)
-
+	rows, err = m.queryByDB()
 	if m.printSql {
-		m.logger.Info("binding[%s] select[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql+m.extraSql, args)
+		m.logger.Info("binding[%s] select[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql+m.extraSql, m.args)
 	}
-
 	if err != nil {
 		return &selectCall{err: err}
 	}
-
 	return &selectCall{
 		sm:     m,
-		args:   args,
+		args:   m.args,
 		logger: m.logger,
 		rows:   rows,
 	}
 }
 
-func (m *SelectMapper) replaceParams(params ...*Param) {
-	m.sql = replaceParams(m.originalSql, params...)
-}
-
-func (m *SelectMapper) queryCountByDB(args ...interface{}) int {
-	defer func() {
-		if re := recover(); re != nil {
-			m.logger.Error("%v", re)
-		}
-	}()
-
+func (m *SelectMapper) queryCountByDB() int {
 	rx := regexp.MustCompile(`^\s*[Ss][Ee][Ll][Ee][Cc][Tt]([\s\S]+)[Ff][Rr][Oo][Mm]`)
 	csql := rx.ReplaceAllString(m.sql, " select count(*) from ")
-
 	var rows *sql.Rows
 	var err error
-	if args != nil && len(args) > 0 {
-		rows, err = m.db.db.Query(csql, args...)
+	if m.args != nil && len(m.args) > 0 {
+		rows, err = m.db.db.Query(csql, m.args...)
 	} else {
 		rows, err = m.db.db.Query(csql)
 	}
 	if err != nil {
 		m.logger.Error("binding[%s] select[%s] queryCountByDB error : %v", m.binding, m.id, err)
-		return 0
+		panic(err)
 	}
 	if m.printSql {
-		m.logger.Info("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, csql, args)
+		m.logger.Info("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, csql, m.args)
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+	}()
 	c := 0
 	if rows.Next() {
-		rows.Scan(&c)
+		_ = rows.Scan(&c)
 	}
 	return c
 }
 
-func (m *SelectMapper) queryByDB(args ...interface{}) (*sql.Rows, error) {
-	defer func() {
-		if re := recover(); re != nil {
-			m.logger.Error("%v", re)
-		}
-	}()
-	if args != nil && len(args) > 0 {
-		rows, err := m.db.db.Query(m.sql+m.extraSql, args...)
+func (m *SelectMapper) queryByDB() (*sql.Rows, error) {
+	if m.args != nil && len(m.args) > 0 {
+		rows, err := m.db.db.Query(m.sql+m.extraSql, m.args...)
 		if err != nil {
 			m.logger.Error("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
-			return nil, err
+			panic(err)
 		}
 		return rows, err
 	} else {
 		rows, err := m.db.db.Query(m.sql + m.extraSql)
 		if err != nil {
 			m.logger.Error("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
-			return nil, err
+			panic(err)
 		}
 		return rows, err
 	}
