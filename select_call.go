@@ -17,11 +17,6 @@ type selectCall struct {
 
 // Scan rows to dists
 func (c *selectCall) Scan(dists ...interface{}) error {
-	defer func() {
-		if re := recover(); re != nil {
-			c.logger.Error("%v", re)
-		}
-	}()
 	//fixed
 	//close rows
 	//release conn
@@ -42,11 +37,6 @@ func (c *selectCall) Scan(dists ...interface{}) error {
 
 // Single return single record
 func (c *selectCall) Single() interface{} {
-	defer func() {
-		if re := recover(); re != nil {
-			c.logger.Error("%v", re)
-		}
-	}()
 	var r interface{}
 	err := c.Scan(&r)
 	if err != nil {
@@ -57,11 +47,6 @@ func (c *selectCall) Single() interface{} {
 
 // SingleInt return single record
 func (c *selectCall) SingleInt() int64 {
-	defer func() {
-		if re := recover(); re != nil {
-			c.logger.Error("%v", re)
-		}
-	}()
 	var r int64
 	err := c.Scan(&r)
 	if err != nil {
@@ -72,11 +57,6 @@ func (c *selectCall) SingleInt() int64 {
 
 // SingleFloat return single record
 func (c *selectCall) SingleFloat() float64 {
-	defer func() {
-		if re := recover(); re != nil {
-			c.logger.Error("%v", re)
-		}
-	}()
 	var r float64
 	err := c.Scan(&r)
 	if err != nil {
@@ -87,11 +67,6 @@ func (c *selectCall) SingleFloat() float64 {
 
 // SingleString return single record
 func (c *selectCall) SingleString() string {
-	defer func() {
-		if re := recover(); re != nil {
-			c.logger.Error("%v", re)
-		}
-	}()
 	var r string
 	err := c.Scan(&r)
 	if err != nil {
@@ -102,22 +77,12 @@ func (c *selectCall) SingleString() string {
 
 // List get list rows
 func (c *selectCall) List(rptr interface{}) []interface{} {
-	defer func() {
-		if re := recover(); re != nil {
-			c.logger.Error("%v", re)
-		}
-	}()
 	c.rptr = rptr
 	return c.scanStruct()
 }
 
 // MapList get map rows
 func (c *selectCall) MapList() []map[string]interface{} {
-	defer func() {
-		if re := recover(); re != nil {
-			c.logger.Error("%v", re)
-		}
-	}()
 	return c.scanMap()
 }
 
@@ -127,11 +92,6 @@ func (c *selectCall) Call(callback func(rows *sql.Rows)) {
 		return
 	}
 	func() {
-		defer func() {
-			if re := recover(); re != nil {
-				c.logger.Error("%v", re)
-			}
-		}()
 		defer func() {
 			err := c.rows.Close()
 			if err != nil {
@@ -143,11 +103,6 @@ func (c *selectCall) Call(callback func(rows *sql.Rows)) {
 }
 
 func (c *selectCall) scanStruct() []interface{} {
-	defer func() {
-		if re := recover(); re != nil {
-			c.logger.Error("%v", re)
-		}
-	}()
 	//must be kind of Ptr
 	if reflect.TypeOf(c.rptr).Kind() != reflect.Ptr {
 		c.logger.Error("structPtr must be the kind of reflect.Ptr")
@@ -195,11 +150,6 @@ func (c *selectCall) scanStruct() []interface{} {
 }
 
 func (c *selectCall) scanMap() []map[string]interface{} {
-	defer func() {
-		if re := recover(); re != nil {
-			c.logger.Error("%v", re)
-		}
-	}()
 	list := make([]map[string]interface{}, 0)
 	columns, _ := c.rows.Columns()
 	//release conn
@@ -246,11 +196,6 @@ func getInterfaceVal(val string) interface{} {
 }
 
 func (c *selectCall) getFieldMap() map[string]string {
-	defer func() {
-		if re := recover(); re != nil {
-			c.logger.Error("%v", re)
-		}
-	}()
 	reflectType := reflect.TypeOf(c.rptr).Elem()
 	fieldNum := reflectType.NumField()
 	fieldMap := make(map[string]string, 0)
