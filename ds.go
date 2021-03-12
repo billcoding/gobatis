@@ -1,6 +1,9 @@
 package gobatis
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+)
 
 type multiDS struct {
 	mds    map[string]*DS
@@ -20,8 +23,8 @@ type DS struct {
 func (m *mapper) DS(ds string) *mapper {
 	mds, have := m.multiDS.mds[ds]
 	if !have {
-		m.logger.Error("[Mapper]Choose DS[%s] fail: not registered", ds)
-		return m
+		m.logger.Error(fmt.Sprintf("[Mapper]Choose DS[%s] fail: not registered", ds))
+		panic(fmt.Sprintf("[Mapper]Choose DS[%s] fail: not registered", ds))
 	}
 	m.currentDS = mds
 	m.logger.Info("[Mapper]Choose DS[%s]", ds)

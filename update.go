@@ -48,7 +48,7 @@ func (m *UpdateMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMa
 	err := t.Execute(&builder, data)
 	if err != nil {
 		m.logger.Error(err.Error())
-		return m
+		panic(err)
 	}
 	m.sql = builder.String()
 	return m

@@ -45,7 +45,6 @@ func (m *mapper) SelectWithDS(id, ds string) *SelectMapper {
 		if !mdsHave {
 			m.logger.Error("[MultiDS] DS[%s] was not registered", ds)
 			panic(fmt.Sprintf("[MultiDS] DS[%s] was not registered", ds))
-			return nil
 		}
 		m.logger.Info("[MultiDS]Choose DS[%s]", ds)
 		cloneSM.db = mds.db
@@ -80,7 +79,6 @@ func (m *mapper) UpdateWithDS(id, ds string) *UpdateMapper {
 		if !mdsHave {
 			m.logger.Error("[MultiDS] DS[%s] was not registered", ds)
 			panic(fmt.Sprintf("[MultiDS] DS[%s] was not registered", ds))
-			return nil
 		}
 		m.logger.Info("[MultiDS]Choose DS[%s]", ds)
 		cloneUM.db = mds.db
