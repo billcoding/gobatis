@@ -35,7 +35,7 @@ func (m *SelectMapper) Page(rptr interface{}, offset, size int) *Page {
 }
 
 // PageMap select Page
-func (m *SelectMapper) PageMap(offset, size int, args ...interface{}) *PageMap {
+func (m *SelectMapper) PageMap(offset, size int) *PageMap {
 	if size <= 0 {
 		size = 10
 	}
@@ -50,7 +50,7 @@ func (m *SelectMapper) PageMap(offset, size int, args ...interface{}) *PageMap {
 	//First query total count
 	totalRows := m.queryCountByDB()
 	if m.printSql {
-		m.logger.Info("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, args)
+		m.logger.Info("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, m.args)
 	}
 	if totalRows > 0 && offset >= 0 && offset <= totalRows-1 {
 		page.TotalRows = totalRows
