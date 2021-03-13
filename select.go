@@ -60,10 +60,10 @@ func (m *SelectMapper) Params(params ...*Param) *SelectMapper {
 func (m *SelectMapper) Exec() *selectCall {
 	var rows *sql.Rows
 	var err error
-	rows, err = m.queryByDB()
 	if m.printSql {
 		m.logger.Info("binding[%s] select[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql+m.extraSql, m.args)
 	}
+	rows, err = m.queryByDB()
 	if err != nil {
 		return &selectCall{err: err}
 	}
@@ -80,6 +80,9 @@ func (m *SelectMapper) queryCountByDB() int {
 	csql := rx.ReplaceAllString(m.sql, " select count(*) from ")
 	var rows *sql.Rows
 	var err error
+	if m.printSql {
+		m.logger.Info("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, csql, m.args)
+	}
 	if m.args != nil && len(m.args) > 0 {
 		rows, err = m.db.db.Query(csql, m.args...)
 	} else {
@@ -88,9 +91,6 @@ func (m *SelectMapper) queryCountByDB() int {
 	if err != nil {
 		m.logger.Error("binding[%s] select[%s] queryCountByDB error : %v", m.binding, m.id, err)
 		panic(err)
-	}
-	if m.printSql {
-		m.logger.Info("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, csql, m.args)
 	}
 	defer func() {
 		_ = rows.Close()

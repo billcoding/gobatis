@@ -124,6 +124,7 @@ type (
 )
 
 var (
+	Conds            = func(conds ...Cond) []Cond { return conds }
 	Eq               = func(c Column, v interface{}) Cond { return &eq{value: v, op: "AND", column: c} }
 	NotEq            = func(c Column, v interface{}) Cond { return &notEq{value: v, op: "AND", column: c} }
 	Like             = func(c Column, v interface{}) Cond { return &like{value: v, op: "AND", column: c} }
@@ -201,7 +202,7 @@ func (c *notEq) SQL() (string, []interface{}) {
 }
 
 func (c *like) SQL() (string, []interface{}) {
-	return fmt.Sprintf(" %s t.%v %s", c.column, `LIKE CONCAT('%', ?, '%')`), []interface{}{c.value}
+	return fmt.Sprintf(" %s t.%v %s", c.op, c.column, `LIKE CONCAT('%', ?, '%')`), []interface{}{c.value}
 }
 
 func (c *notLike) SQL() (string, []interface{}) {
@@ -233,43 +234,43 @@ func (c *notInstr) SQL() (string, []interface{}) {
 }
 
 func (c *gt) SQL() (string, []interface{}) {
-	return fmt.Sprintf(" %s t.%v > 0", c.op, c.column), []interface{}{c.value}
+	return fmt.Sprintf(" %s t.%v > ?", c.op, c.column), []interface{}{c.value}
 }
 
 func (c *notGt) SQL() (string, []interface{}) {
-	return fmt.Sprintf(" %s NOT t.%v > 0", c.op, c.column), []interface{}{c.value}
+	return fmt.Sprintf(" %s NOT t.%v > ?", c.op, c.column), []interface{}{c.value}
 }
 
 func (c *gtEq) SQL() (string, []interface{}) {
-	return fmt.Sprintf(" %s t.%v >= 0", c.op, c.column), []interface{}{c.value}
+	return fmt.Sprintf(" %s t.%v >= ?", c.op, c.column), []interface{}{c.value}
 }
 
 func (c *notGtEq) SQL() (string, []interface{}) {
-	return fmt.Sprintf(" %s NOT t.%v >= 0", c.op, c.column), []interface{}{c.value}
+	return fmt.Sprintf(" %s NOT t.%v >= ?", c.op, c.column), []interface{}{c.value}
 }
 
 func (c *lt) SQL() (string, []interface{}) {
-	return fmt.Sprintf(" %s t.%v < 0", c.op, c.column), []interface{}{c.value}
+	return fmt.Sprintf(" %s t.%v < ?", c.op, c.column), []interface{}{c.value}
 }
 
 func (c *notLt) SQL() (string, []interface{}) {
-	return fmt.Sprintf(" %s NOT t.%v < 0", c.op, c.column), []interface{}{c.value}
+	return fmt.Sprintf(" %s NOT t.%v < ?", c.op, c.column), []interface{}{c.value}
 }
 
 func (c *ltEq) SQL() (string, []interface{}) {
-	return fmt.Sprintf(" %s t.%v <= 0", c.op, c.column), []interface{}{c.value}
+	return fmt.Sprintf(" %s t.%v <= ?", c.op, c.column), []interface{}{c.value}
 }
 
 func (c *notLtEq) SQL() (string, []interface{}) {
-	return fmt.Sprintf(" %s NOT t.%v <= 0", c.op, c.column), []interface{}{c.value}
+	return fmt.Sprintf(" %s NOT t.%v <= ?", c.op, c.column), []interface{}{c.value}
 }
 
 func (c *betweenAnd) SQL() (string, []interface{}) {
-	return fmt.Sprintf(" %s t.%v BETWEEND ? AND ?", c.op, c.column), []interface{}{c.left, c.right}
+	return fmt.Sprintf(" %s (t.%v BETWEEN ? AND ?)", c.op, c.column), []interface{}{c.left, c.right}
 }
 
 func (c *notBetweenAnd) SQL() (string, []interface{}) {
-	return fmt.Sprintf(" %s NOT t.%v BETWEEND ? AND ?", c.op, c.column), []interface{}{c.left, c.right}
+	return fmt.Sprintf(" %s (NOT t.%v BETWEEN ? AND ?)", c.op, c.column), []interface{}{c.left, c.right}
 }
 
 func (c *in) SQL() (string, []interface{}) {
