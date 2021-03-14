@@ -1,21 +1,28 @@
 package gobatis
 
-import "encoding/xml"
+import (
+	"embed"
+	"encoding/xml"
+)
 
-// AddRaw add raw xml
-func (b *Batis) AddRaw(rawXML string) *Batis {
+// AddFS add FS xml
+func (b *Batis) AddFS(FS *embed.FS, name string) *Batis {
 	node := mapperNode{}
-	err := xml.Unmarshal([]byte(rawXML), &node)
+	bytes, err := FS.ReadFile(name)
 	if err != nil {
 		b.Logger.Error("%v", err)
-		return b
+		panic(err)
+	}
+	err = xml.Unmarshal(bytes, &node)
+	if err != nil {
+		b.Logger.Error("%v", err)
+		panic(err)
 	}
 	_, have := b.mappers[node.Binding]
 	if have {
-		b.Logger.Error("[Raw]AddRaw binding[%v] fail: duplicated", node.Binding)
-		return b
+		b.Logger.Error("[FS]AddFS binding[%v] fail: duplicated", node.Binding)
+		panic(err)
 	}
-	b.mapperNodes[node.Binding] = &node
 	b.mappers[node.Binding] = &mapper{
 		logger:        b.Logger,
 		binding:       node.Binding,
@@ -23,6 +30,6 @@ func (b *Batis) AddRaw(rawXML string) *Batis {
 		selectMappers: b.prepareSelectMappers(node.Binding, node.MapperSelectNodes),
 		updateMappers: b.prepareUpdateMappers(node.Binding, node.MapperUpdateNodes),
 	}
-	b.Logger.Info("[Raw]AddRaw binding[%v] success", node.Binding)
+	b.Logger.Info("[FS]AddFS binding[%v] success", node.Binding)
 	return b
 }

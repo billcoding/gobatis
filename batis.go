@@ -11,34 +11,20 @@ var batis *Batis
 
 // Batis struct
 type Batis struct {
-	inited            bool
-	mutex             sync.Mutex
-	parsedMapperPaths []string
-	mapperFiles       []string
-	mappers           map[string]*mapper
-	mapperNodes       map[string]*mapperNode
-	// Config field
-	Config *Config
-	// Logger field
-	Logger *log
-	// MultiDS field
-	MultiDS *multiDS
-	// FuncMap field
-	FuncMap template.FuncMap
+	mutex       sync.Mutex
+	mappers     map[string]*mapper
+	mapperNodes map[string]*mapperNode
+	Logger      *log
+	MultiDS     *multiDS
+	FuncMap     template.FuncMap
+	PrintSql    bool
 }
 
 func newBatis() *Batis {
 	return &Batis{
-		mutex:             sync.Mutex{},
-		parsedMapperPaths: make([]string, 0),
-		mapperFiles:       make([]string, 0),
-		mappers:           make(map[string]*mapper, 0),
-		mapperNodes:       make(map[string]*mapperNode, 0),
-		Config: &Config{
-			AutoScan:    true,
-			PrintSql:    false,
-			MapperPaths: []string{"./mapper"},
-		},
+		mutex:       sync.Mutex{},
+		mappers:     make(map[string]*mapper, 0),
+		mapperNodes: make(map[string]*mapperNode, 0),
 		Logger: &log{
 			outLogger: l.New(os.Stdout, "[GOBATIS]", l.LstdFlags),
 			errLogger: l.New(os.Stdout, "[GOBATIS]", l.LstdFlags),
@@ -51,7 +37,8 @@ func newBatis() *Batis {
 				ConnMaxLifetime: 10,
 			},
 		},
-		FuncMap: make(map[string]interface{}, 0),
+		FuncMap:  make(map[string]interface{}, 0),
+		PrintSql: false,
 	}
 }
 
@@ -61,41 +48,16 @@ func init() {
 
 // Default return default Batis
 func Default() *Batis {
+	if batis != nil {
+		batis.parseEnv()
+	}
 	return batis
 }
 
 // New return new Batis
 func New() *Batis {
-	return newBatis()
-}
-
-// Init Batis
-func (b *Batis) Init() *Batis {
-	b.parseEnv()
-	b.parseMapperPaths()
-	b.scanMapper()
-	b.inited = true
-	return b
-}
-
-func (b *Batis) scanMapper() *Batis {
-	if !b.Config.AutoScan {
-		return b
-	}
-	if len(b.parsedMapperPaths) <= 0 {
-		return b
-	}
-	b.mutex.Lock()
-	defer b.mutex.Unlock()
-	// collect mapperNode files
-	for _, mapperPath := range b.parsedMapperPaths {
-		b.Logger.Info("[Mapper]scan mapper files : %v", mapperPath)
-		for _, mf := range getMapperFiles(mapperPath) {
-			b.mapperFiles = append(b.mapperFiles, mf)
-		}
-	}
-	b.parseMappers()
-	b.prepareMappers()
+	b := newBatis()
+	batis.parseEnv()
 	return b
 }
 
@@ -108,19 +70,6 @@ func (b *Batis) Mapper(binding string) *mapper {
 	}
 	_, mds := b.MultiDS.defaultDS()
 	mp.currentDS = mds
-	mp.printSql = b.Config.PrintSql
+	mp.printSql = b.PrintSql
 	return mp
-}
-
-// MapperPaths set mapper path
-func (b *Batis) MapperPaths(mapperPaths ...string) *Batis {
-	b.Config.MapperPaths = mapperPaths
-	return b
-}
-
-func (b *Batis) parseMapperPaths() *Batis {
-	for _, mapperPath := range b.Config.MapperPaths {
-		b.parsedMapperPaths = append(b.parsedMapperPaths, mapperPath)
-	}
-	return b
 }

@@ -1,37 +1,5 @@
 package gobatis
 
-import (
-	"encoding/xml"
-	"io/ioutil"
-)
-
-func (b *Batis) parseMappers() *Batis {
-	for _, file := range b.mapperFiles {
-		bytes, err := ioutil.ReadFile(file)
-		if err != nil {
-			b.Logger.Error("[Mapper]error : %v", err)
-			continue
-		}
-		mapperNode := &mapperNode{}
-		b.Logger.Info("[Mapper]parsing mapper file : %v", file)
-		err = xml.Unmarshal(bytes, &mapperNode)
-		if err != nil {
-			b.Logger.Error("[Mapper]error : %v", err)
-			continue
-		}
-		if mapperNode.Binding == "" {
-			b.Logger.Error("[Mapper]mapper binding muse be provided in `%v`", file)
-			continue
-		}
-		if _, have := b.mapperNodes[mapperNode.Binding]; have {
-			b.Logger.Error("[Mapper]mapper binding is exists in `%v`", file)
-			continue
-		}
-		b.mapperNodes[mapperNode.Binding] = mapperNode
-	}
-	return b
-}
-
 func (b *Batis) prepareMappers() {
 	for binding, node := range b.mapperNodes {
 		updateMappers := b.prepareUpdateMappers(binding, node.MapperUpdateNodes)
@@ -61,7 +29,7 @@ func (b *Batis) prepareUpdateMappers(binding string, mapperUpdateNodes []mapperU
 			}
 			updateMapperMap[id] = &UpdateMapper{
 				gfuncMap:    &b.FuncMap,
-				printSql:    b.Config.PrintSql,
+				printSql:    b.PrintSql,
 				logger:      b.Logger,
 				binding:     binding,
 				id:          id,
@@ -86,7 +54,7 @@ func (b *Batis) prepareSelectMappers(binding string, mapperSelectNodes []mapperS
 			selectMapperMap[id] = &SelectMapper{
 				gfuncMap:    &b.FuncMap,
 				logger:      b.Logger,
-				printSql:    b.Config.PrintSql,
+				printSql:    b.PrintSql,
 				binding:     binding,
 				id:          id,
 				originalSql: sql,

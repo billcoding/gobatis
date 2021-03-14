@@ -43,28 +43,28 @@ require github.com/billcoding/gobatis latest
 - Insert
 
 ```
-userMapper := Default().Init().DSN(dsn).Mapper("user")
+userMapper := Default().DSN(dsn).Mapper("user")
 err := userMapper.Update("insert").Exec("inserted")
 ```
 
 - Delete
 
 ```
-userMapper := Default().Init().DSN(dsn).Mapper("user")
+userMapper := Default().DSN(dsn).Mapper("user")
 err := userMapper.Update("delete").Exec(1)
 ```
 
 - Update
 
 ```
-userMapper := Default().Init().DSN(dsn).Mapper("user")
+userMapper := Default().DSN(dsn).Mapper("user")
 err := userMapper.Update("update").Exec("updated", 1)
 ```
 
 - Select Simple
 
 ```
-var batis = Default().Init().DSN(dsn)
+var batis = Default().DSN(dsn)
 userMapper := batis.Mapper("user")
 userMapper.Select("selectSimple").Exec().Call(func(rows *sql.Rows) {
     if rows.Next() {
@@ -79,7 +79,7 @@ userMapper.Select("selectSimple").Exec().Call(func(rows *sql.Rows) {
 - Select Struct
 
 ```
-var batis = Default().Init().DSN(dsn)
+var batis = Default().DSN(dsn)
 type User struct {
     Id   int    `db:"id"`
     Name string `db:"name"`
