@@ -15,8 +15,8 @@ type selectCall struct {
 	rptr   interface{}
 }
 
-// Scan rows to dists
-func (c *selectCall) Scan(dists ...interface{}) error {
+// Scan rows to dest
+func (c *selectCall) Scan(dest ...interface{}) error {
 	//fixed
 	//close rows
 	//release conn
@@ -27,7 +27,7 @@ func (c *selectCall) Scan(dists ...interface{}) error {
 		}
 	}()
 	if c.rows.Next() {
-		err := c.rows.Scan(dists...)
+		err := c.rows.Scan(dest...)
 		if err != nil {
 			c.logger.Error("%v", err)
 		}
@@ -76,8 +76,8 @@ func (c *selectCall) SingleString() string {
 }
 
 // List get list rows
-func (c *selectCall) List(rptr interface{}) []interface{} {
-	c.rptr = rptr
+func (c *selectCall) List(ptr interface{}) []interface{} {
+	c.rptr = ptr
 	return c.scanStruct()
 }
 
@@ -126,21 +126,21 @@ func (c *selectCall) scanStruct() []interface{} {
 	}()
 	for c.rows.Next() {
 		//make struct field num length slice
-		fieldAddrs := make([]interface{}, len(columns))
+		fieldAdds := make([]interface{}, len(columns))
 		//match's column and field
 		//create new struct == dynamic create struct object
 		nrv := reflect.New(rt).Elem()
 		for i, column := range columns {
 			if fieldName, have := fieldMap[column]; have {
 				field := nrv.FieldByName(fieldName)
-				//put field's address into fieldAddrs
-				fieldAddrs[i] = field.Addr().Interface()
+				//put field's address into fieldAdds
+				fieldAdds[i] = field.Addr().Interface()
 			} else {
 				var unused interface{}
-				fieldAddrs[i] = &unused
+				fieldAdds[i] = &unused
 			}
 		}
-		err := c.rows.Scan(fieldAddrs...)
+		err := c.rows.Scan(fieldAdds...)
 		if err != nil {
 			c.logger.Error("%v", err)
 		}

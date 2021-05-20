@@ -8,12 +8,10 @@ func (b *Batis) AddRaw(rawXML string) *Batis {
 	err := xml.Unmarshal([]byte(rawXML), &node)
 	if err != nil {
 		b.Logger.Error("%v", err)
-		return b
 	}
 	_, have := b.mappers[node.Binding]
 	if have {
 		b.Logger.Error("[Raw]AddRaw binding[%v] fail: duplicated", node.Binding)
-		return b
 	}
 	b.mapperNodes[node.Binding] = &node
 	b.mappers[node.Binding] = &mapper{

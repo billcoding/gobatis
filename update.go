@@ -48,7 +48,6 @@ func (m *UpdateMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMa
 	err := t.Execute(&builder, data)
 	if err != nil {
 		m.logger.Error(err.Error())
-		panic(err)
 	}
 	m.sql = builder.String()
 	return m
@@ -91,14 +90,12 @@ func (m *UpdateMapper) updateByTx(tx *sql.Tx) (sql.Result, error) {
 		result, err := tx.Exec(m.sql, m.args...)
 		if err != nil {
 			m.logger.Error("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
-			panic(err)
 		}
 		return result, nil
 	} else {
 		result, err := tx.Exec(m.sql)
 		if err != nil {
 			m.logger.Error("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
-			panic(err)
 		}
 		return result, nil
 	}
@@ -109,14 +106,12 @@ func (m *UpdateMapper) updateByDB() (sql.Result, error) {
 		result, err := m.db.db.Exec(m.sql, m.args...)
 		if err != nil {
 			m.logger.Error("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
-			panic(err)
 		}
 		return result, nil
 	} else {
 		result, err := m.db.db.Exec(m.sql)
 		if err != nil {
 			m.logger.Error("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
-			panic(err)
 		}
 		return result, nil
 	}

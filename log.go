@@ -23,5 +23,7 @@ func (l *log) Warn(message string, args ...interface{}) {
 
 // Error level
 func (l *log) Error(message string, args ...interface{}) {
-	l.errLogger.Println(fmt.Sprintf(message, args...))
+	msg := fmt.Sprintf(message, args...)
+	l.errLogger.Println(msg)
+	panic(msg)
 }

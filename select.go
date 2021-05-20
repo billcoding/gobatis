@@ -38,7 +38,6 @@ func (m *SelectMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMa
 	err := t.Execute(&builder, data)
 	if err != nil {
 		m.logger.Error(err.Error())
-		return m
 	}
 	m.sql = builder.String()
 	return m
@@ -90,7 +89,6 @@ func (m *SelectMapper) queryCountByDB() int {
 	}
 	if err != nil {
 		m.logger.Error("binding[%s] select[%s] queryCountByDB error : %v", m.binding, m.id, err)
-		panic(err)
 	}
 	defer func() {
 		_ = rows.Close()
@@ -107,14 +105,12 @@ func (m *SelectMapper) queryByDB() (*sql.Rows, error) {
 		rows, err := m.db.db.Query(m.sql+m.extraSql, m.args...)
 		if err != nil {
 			m.logger.Error("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
-			panic(err)
 		}
 		return rows, err
 	} else {
 		rows, err := m.db.db.Query(m.sql + m.extraSql)
 		if err != nil {
 			m.logger.Error("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
-			panic(err)
 		}
 		return rows, err
 	}

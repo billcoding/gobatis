@@ -1,7 +1,6 @@
 package gobatis
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -31,7 +30,6 @@ func (m *mapper) SelectWithDS(id, ds string) *SelectMapper {
 	selectMapper, have := m.selectMappers[id]
 	if !have {
 		m.logger.Error("no select node : %v", id)
-		panic(fmt.Sprintf("no select node : %v", id))
 	}
 	cloneSM := &SelectMapper{}
 	copySelectMapper(cloneSM, selectMapper)
@@ -44,7 +42,6 @@ func (m *mapper) SelectWithDS(id, ds string) *SelectMapper {
 		mds, mdsHave := m.multiDS.mds[ds]
 		if !mdsHave {
 			m.logger.Error("[MultiDS] DS[%s] was not registered", ds)
-			panic(fmt.Sprintf("[MultiDS] DS[%s] was not registered", ds))
 		}
 		m.logger.Info("[MultiDS]Choose DS[%s]", ds)
 		cloneSM.db = mds.db
@@ -65,7 +62,6 @@ func (m *mapper) UpdateWithDS(id, ds string) *UpdateMapper {
 	updateMapper, have := m.updateMappers[id]
 	if !have {
 		m.logger.Error("no update node : %v", id)
-		panic(fmt.Sprintf("no update node : %v", id))
 	}
 	cloneUM := &UpdateMapper{}
 	copyUpdateMapper(cloneUM, updateMapper)
@@ -78,7 +74,6 @@ func (m *mapper) UpdateWithDS(id, ds string) *UpdateMapper {
 		mds, mdsHave := m.multiDS.mds[ds]
 		if !mdsHave {
 			m.logger.Error("[MultiDS] DS[%s] was not registered", ds)
-			panic(fmt.Sprintf("[MultiDS] DS[%s] was not registered", ds))
 		}
 		m.logger.Info("[MultiDS]Choose DS[%s]", ds)
 		cloneUM.db = mds.db
