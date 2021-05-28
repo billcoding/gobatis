@@ -23,7 +23,7 @@ type DS struct {
 func (m *mapper) DS(ds string) *mapper {
 	mds, have := m.multiDS.mds[ds]
 	if !have {
-		m.logger.Errorf(fmt.Sprintf("[Mapper]Choose DS[%s] fail: not registered", ds))
+		m.logger.Panicf(fmt.Sprintf("[Mapper]Choose DS[%s] fail: not registered", ds))
 	}
 	m.currentDS = mds
 	m.logger.Infof("[Mapper]Choose DS[%s]", ds)

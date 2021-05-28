@@ -24,13 +24,13 @@ func (c *selectCall) Scan(dest ...interface{}) error {
 	defer func() {
 		err := c.rows.Close()
 		if err != nil {
-			c.logger.Errorf("%v", err)
+			c.logger.Panicf("%v", err)
 		}
 	}()
 	if c.rows.Next() {
 		err := c.rows.Scan(dest...)
 		if err != nil {
-			c.logger.Errorf("%v", err)
+			c.logger.Panicf("%v", err)
 		}
 	}
 	return c.rows.Err()
@@ -41,7 +41,7 @@ func (c *selectCall) Single() interface{} {
 	var r interface{}
 	err := c.Scan(&r)
 	if err != nil {
-		c.logger.Errorf("%v", err)
+		c.logger.Panicf("%v", err)
 	}
 	return r
 }
@@ -51,7 +51,7 @@ func (c *selectCall) SingleInt() int64 {
 	var r int64
 	err := c.Scan(&r)
 	if err != nil {
-		c.logger.Errorf("%v", err)
+		c.logger.Panicf("%v", err)
 	}
 	return r
 }
@@ -61,7 +61,7 @@ func (c *selectCall) SingleFloat() float64 {
 	var r float64
 	err := c.Scan(&r)
 	if err != nil {
-		c.logger.Errorf("%v", err)
+		c.logger.Panicf("%v", err)
 	}
 	return r
 }
@@ -71,7 +71,7 @@ func (c *selectCall) SingleString() string {
 	var r string
 	err := c.Scan(&r)
 	if err != nil {
-		c.logger.Errorf("%v", err)
+		c.logger.Panicf("%v", err)
 	}
 	return r
 }
@@ -96,7 +96,7 @@ func (c *selectCall) Call(callback func(rows *sql.Rows)) {
 		defer func() {
 			err := c.rows.Close()
 			if err != nil {
-				c.logger.Errorf("%v", err)
+				c.logger.Panicf("%v", err)
 			}
 		}()
 		callback(c.rows)
@@ -106,7 +106,7 @@ func (c *selectCall) Call(callback func(rows *sql.Rows)) {
 func (c *selectCall) scanStruct() []interface{} {
 	//must be kind of Ptr
 	if reflect.TypeOf(c.rptr).Kind() != reflect.Ptr {
-		c.logger.Errorf("structPtr must be the kind of reflect.Ptr")
+		c.logger.Panicf("structPtr must be the kind of reflect.Ptr")
 	}
 
 	//receive the struct type
@@ -122,7 +122,7 @@ func (c *selectCall) scanStruct() []interface{} {
 	defer func() {
 		err := c.rows.Close()
 		if err != nil {
-			c.logger.Errorf("%v", err)
+			c.logger.Panicf("%v", err)
 		}
 	}()
 	for c.rows.Next() {
@@ -143,7 +143,7 @@ func (c *selectCall) scanStruct() []interface{} {
 		}
 		err := c.rows.Scan(fieldAdds...)
 		if err != nil {
-			c.logger.Errorf("%v", err)
+			c.logger.Panicf("%v", err)
 		}
 		list = append(list, nrv.Addr().Interface())
 	}
@@ -157,7 +157,7 @@ func (c *selectCall) scanMap() []map[string]interface{} {
 	defer func() {
 		err := c.rows.Close()
 		if err != nil {
-			c.logger.Errorf("%v", err)
+			c.logger.Panicf("%v", err)
 		}
 	}()
 	for c.rows.Next() {
@@ -169,7 +169,7 @@ func (c *selectCall) scanMap() []map[string]interface{} {
 		}
 		err := c.rows.Scan(addrs...)
 		if err != nil {
-			c.logger.Errorf("%v", err)
+			c.logger.Panicf("%v", err)
 		}
 		for i, column := range columns {
 			m[column] = getInterfaceVal(*(addrs[i].(*string)))

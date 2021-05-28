@@ -38,7 +38,7 @@ func (m *SelectMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMa
 	var builder strings.Builder
 	err := t.Execute(&builder, data)
 	if err != nil {
-		m.logger.Errorf(err.Error())
+		m.logger.Panicf(err.Error())
 	}
 	m.sql = builder.String()
 	return m
@@ -89,7 +89,7 @@ func (m *SelectMapper) queryCountByDB() int {
 		rows, err = m.db.db.Query(csql)
 	}
 	if err != nil {
-		m.logger.Errorf("binding[%s] select[%s] queryCountByDB error : %v", m.binding, m.id, err)
+		m.logger.Panicf("binding[%s] select[%s] queryCountByDB error : %v", m.binding, m.id, err)
 	}
 	defer func() {
 		_ = rows.Close()
@@ -105,13 +105,13 @@ func (m *SelectMapper) queryByDB() (*sql.Rows, error) {
 	if m.args != nil && len(m.args) > 0 {
 		rows, err := m.db.db.Query(m.sql+m.extraSql, m.args...)
 		if err != nil {
-			m.logger.Errorf("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
+			m.logger.Panicf("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
 		}
 		return rows, err
 	} else {
 		rows, err := m.db.db.Query(m.sql + m.extraSql)
 		if err != nil {
-			m.logger.Errorf("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
+			m.logger.Panicf("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
 		}
 		return rows, err
 	}

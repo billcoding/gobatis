@@ -39,16 +39,16 @@ func (m *UpdateMapper) Prepare(data interface{}) *UpdateMapper {
 // PrepareWithFunc using text/template
 func (m *UpdateMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMap) *UpdateMapper {
 	var t *template.Template
-	gfuncMap := joinFuncMap(*m.funcMap, funcMap)
-	if len(gfuncMap) <= 0 {
+	funcMap2 := joinFuncMap(*m.funcMap, funcMap)
+	if len(funcMap) <= 0 {
 		t = template.Must(template.New("").Parse(m.originalSql))
 	} else {
-		t = template.Must(template.New("").Funcs(gfuncMap).Parse(m.originalSql))
+		t = template.Must(template.New("").Funcs(funcMap2).Parse(m.originalSql))
 	}
 	var builder strings.Builder
 	err := t.Execute(&builder, data)
 	if err != nil {
-		m.logger.Errorf(err.Error())
+		m.logger.Panicf(err.Error())
 	}
 	m.sql = builder.String()
 	return m
@@ -90,13 +90,13 @@ func (m *UpdateMapper) updateByTx(tx *sql.Tx) (sql.Result, error) {
 	if m.args != nil && len(m.args) > 0 {
 		result, err := tx.Exec(m.sql, m.args...)
 		if err != nil {
-			m.logger.Errorf("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
+			m.logger.Panicf("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
 		}
 		return result, nil
 	} else {
 		result, err := tx.Exec(m.sql)
 		if err != nil {
-			m.logger.Errorf("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
+			m.logger.Panicf("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
 		}
 		return result, nil
 	}
@@ -106,13 +106,13 @@ func (m *UpdateMapper) updateByDB() (sql.Result, error) {
 	if m.args != nil && len(m.args) > 0 {
 		result, err := m.db.db.Exec(m.sql, m.args...)
 		if err != nil {
-			m.logger.Errorf("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
+			m.logger.Panicf("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
 		}
 		return result, nil
 	} else {
 		result, err := m.db.db.Exec(m.sql)
 		if err != nil {
-			m.logger.Errorf("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
+			m.logger.Panicf("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
 		}
 		return result, nil
 	}

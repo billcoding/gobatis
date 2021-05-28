@@ -30,7 +30,7 @@ func (m *mapper) SelectWithDS(id, ds string) *SelectMapper {
 	mutex1.Lock()
 	selectMapper, have := m.selectMappers[id]
 	if !have {
-		m.logger.Errorf("no select node : %v", id)
+		m.logger.Panicf("no select node : %v", id)
 	}
 	cloneSM := &SelectMapper{}
 	copySelectMapper(cloneSM, selectMapper)
@@ -42,7 +42,7 @@ func (m *mapper) SelectWithDS(id, ds string) *SelectMapper {
 	} else {
 		mds, mdsHave := m.multiDS.mds[ds]
 		if !mdsHave {
-			m.logger.Errorf("[MultiDS] DS[%s] was not registered", ds)
+			m.logger.Panicf("[MultiDS] DS[%s] was not registered", ds)
 		}
 		m.logger.Infof("[MultiDS]Choose DS[%s]", ds)
 		cloneSM.db = mds.db
@@ -62,7 +62,7 @@ func (m *mapper) UpdateWithDS(id, ds string) *UpdateMapper {
 	mutex2.Lock()
 	updateMapper, have := m.updateMappers[id]
 	if !have {
-		m.logger.Errorf("no update node : %v", id)
+		m.logger.Panicf("no update node : %v", id)
 	}
 	cloneUM := &UpdateMapper{}
 	copyUpdateMapper(cloneUM, updateMapper)
@@ -74,7 +74,7 @@ func (m *mapper) UpdateWithDS(id, ds string) *UpdateMapper {
 	} else {
 		mds, mdsHave := m.multiDS.mds[ds]
 		if !mdsHave {
-			m.logger.Errorf("[MultiDS] DS[%s] was not registered", ds)
+			m.logger.Panicf("[MultiDS] DS[%s] was not registered", ds)
 		}
 		m.logger.Infof("[MultiDS]Choose DS[%s]", ds)
 		cloneUM.db = mds.db

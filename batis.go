@@ -54,7 +54,7 @@ func New() *Batis {
 func (b *Batis) Mapper(binding string) *mapper {
 	mp, have := b.mappers[binding]
 	if !have {
-		b.Logger.Errorf("[Mapper]no binding : %v", binding)
+		b.Logger.Panicf("[Mapper]no binding : %v", binding)
 	}
 	_, mds := b.MultiDS.defaultDS()
 	mp.currentDS = mds

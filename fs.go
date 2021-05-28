@@ -10,15 +10,15 @@ func (b *Batis) AddFS(FS *embed.FS, name string) *Batis {
 	node := mapperNode{}
 	bytes, err := FS.ReadFile(name)
 	if err != nil {
-		b.Logger.Errorf("%v", err)
+		b.Logger.Panicf("%v", err)
 	}
 	err = xml.Unmarshal(bytes, &node)
 	if err != nil {
-		b.Logger.Errorf("%v", err)
+		b.Logger.Panicf("%v", err)
 	}
 	_, have := b.mappers[node.Binding]
 	if have {
-		b.Logger.Errorf("[FS]AddFS binding[%v] fail: duplicated", node.Binding)
+		b.Logger.Panicf("[FS]AddFS binding[%v] fail: duplicated", node.Binding)
 	}
 	b.mappers[node.Binding] = &mapper{
 		logger:        b.Logger,
