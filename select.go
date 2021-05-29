@@ -2,14 +2,15 @@ package gobatis
 
 import (
 	"database/sql"
+	"github.com/sirupsen/logrus"
 	"regexp"
 	"strings"
 	"text/template"
 )
 
 type SelectMapper struct {
-	gfuncMap    *template.FuncMap
-	logger      *log
+	funcMap     *template.FuncMap
+	logger      *logrus.Logger
 	printSql    bool
 	binding     string
 	id          string
@@ -28,7 +29,7 @@ func (m *SelectMapper) Prepare(data interface{}) *SelectMapper {
 // PrepareWithFunc using text/template with func
 func (m *SelectMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMap) *SelectMapper {
 	var t *template.Template
-	gfuncMap := joinFuncMap(*m.gfuncMap, funcMap)
+	gfuncMap := joinFuncMap(*m.funcMap, funcMap)
 	if len(gfuncMap) <= 0 {
 		t = template.Must(template.New("").Parse(m.originalSql))
 	} else {
@@ -37,7 +38,7 @@ func (m *SelectMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMa
 	var builder strings.Builder
 	err := t.Execute(&builder, data)
 	if err != nil {
-		m.logger.Error(err.Error())
+		m.logger.Errorf(err.Error())
 	}
 	m.sql = builder.String()
 	return m
@@ -60,7 +61,7 @@ func (m *SelectMapper) Exec() *selectCall {
 	var rows *sql.Rows
 	var err error
 	if m.printSql {
-		m.logger.Info("binding[%s] select[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql+m.extraSql, m.args)
+		m.logger.Infof("binding[%s] select[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql+m.extraSql, m.args)
 	}
 	rows, err = m.queryByDB()
 	if err != nil {
@@ -80,7 +81,7 @@ func (m *SelectMapper) queryCountByDB() int {
 	var rows *sql.Rows
 	var err error
 	if m.printSql {
-		m.logger.Info("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, csql, m.args)
+		m.logger.Infof("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, csql, m.args)
 	}
 	if m.args != nil && len(m.args) > 0 {
 		rows, err = m.db.db.Query(csql, m.args...)
@@ -88,7 +89,7 @@ func (m *SelectMapper) queryCountByDB() int {
 		rows, err = m.db.db.Query(csql)
 	}
 	if err != nil {
-		m.logger.Error("binding[%s] select[%s] queryCountByDB error : %v", m.binding, m.id, err)
+		m.logger.Errorf("binding[%s] select[%s] queryCountByDB error : %v", m.binding, m.id, err)
 	}
 	defer func() {
 		_ = rows.Close()
@@ -104,13 +105,13 @@ func (m *SelectMapper) queryByDB() (*sql.Rows, error) {
 	if m.args != nil && len(m.args) > 0 {
 		rows, err := m.db.db.Query(m.sql+m.extraSql, m.args...)
 		if err != nil {
-			m.logger.Error("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
+			m.logger.Errorf("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
 		}
 		return rows, err
 	} else {
 		rows, err := m.db.db.Query(m.sql + m.extraSql)
 		if err != nil {
-			m.logger.Error("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
+			m.logger.Errorf("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
 		}
 		return rows, err
 	}

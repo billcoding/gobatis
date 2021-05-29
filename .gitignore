@@ -12,3 +12,6 @@
 *.out
 
 .idea
+logs
+*.log
+*.gz

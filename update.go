@@ -2,14 +2,15 @@ package gobatis
 
 import (
 	"database/sql"
+	"github.com/sirupsen/logrus"
 	"strings"
 	"text/template"
 )
 
 type UpdateMapper struct {
-	gfuncMap     *template.FuncMap
+	funcMap      *template.FuncMap
 	printSql     bool
-	logger       *log
+	logger       *logrus.Logger
 	binding      string
 	id           string
 	db           *DB
@@ -38,7 +39,7 @@ func (m *UpdateMapper) Prepare(data interface{}) *UpdateMapper {
 // PrepareWithFunc using text/template
 func (m *UpdateMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMap) *UpdateMapper {
 	var t *template.Template
-	gfuncMap := joinFuncMap(*m.gfuncMap, funcMap)
+	gfuncMap := joinFuncMap(*m.funcMap, funcMap)
 	if len(gfuncMap) <= 0 {
 		t = template.Must(template.New("").Parse(m.originalSql))
 	} else {
@@ -47,7 +48,7 @@ func (m *UpdateMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMa
 	var builder strings.Builder
 	err := t.Execute(&builder, data)
 	if err != nil {
-		m.logger.Error(err.Error())
+		m.logger.Errorf(err.Error())
 	}
 	m.sql = builder.String()
 	return m
@@ -71,7 +72,7 @@ func (m *UpdateMapper) Exec() error {
 	var err error
 	result, err = m.updateByDB()
 	if m.printSql {
-		m.logger.Info("[SQL]binding[%s] update[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, m.args)
+		m.logger.Infof("[SQL]binding[%s] update[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, m.args)
 	}
 	if err != nil {
 		return err
@@ -89,13 +90,13 @@ func (m *UpdateMapper) updateByTx(tx *sql.Tx) (sql.Result, error) {
 	if m.args != nil && len(m.args) > 0 {
 		result, err := tx.Exec(m.sql, m.args...)
 		if err != nil {
-			m.logger.Error("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
+			m.logger.Errorf("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
 		}
 		return result, nil
 	} else {
 		result, err := tx.Exec(m.sql)
 		if err != nil {
-			m.logger.Error("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
+			m.logger.Errorf("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
 		}
 		return result, nil
 	}
@@ -105,13 +106,13 @@ func (m *UpdateMapper) updateByDB() (sql.Result, error) {
 	if m.args != nil && len(m.args) > 0 {
 		result, err := m.db.db.Exec(m.sql, m.args...)
 		if err != nil {
-			m.logger.Error("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
+			m.logger.Errorf("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
 		}
 		return result, nil
 	} else {
 		result, err := m.db.db.Exec(m.sql)
 		if err != nil {
-			m.logger.Error("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
+			m.logger.Errorf("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
 		}
 		return result, nil
 	}

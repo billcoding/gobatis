@@ -24,11 +24,11 @@ func (b *Batis) prepareUpdateMappers(binding string, mapperUpdateNodes []mapperU
 			id := node.Id
 			sql := node.Text
 			if sql == "" {
-				b.Logger.Warn("[Mapper]node sql is empty : %v", id)
+				b.Logger.Warnf("[Mapper]node sql is empty : %v", id)
 				continue
 			}
 			updateMapperMap[id] = &UpdateMapper{
-				gfuncMap:    &b.FuncMap,
+				funcMap:     &b.FuncMap,
 				printSql:    b.PrintSql,
 				logger:      b.Logger,
 				binding:     binding,
@@ -48,11 +48,11 @@ func (b *Batis) prepareSelectMappers(binding string, mapperSelectNodes []mapperS
 			id := node.Id
 			sql := node.Text
 			if sql == "" {
-				b.Logger.Warn("[Mapper]node sql is empty : %v", id)
+				b.Logger.Warnf("[Mapper]node sql is empty : %v", id)
 				continue
 			}
 			selectMapperMap[id] = &SelectMapper{
-				gfuncMap:    &b.FuncMap,
+				funcMap:     &b.FuncMap,
 				logger:      b.Logger,
 				printSql:    b.PrintSql,
 				binding:     binding,
