@@ -54,12 +54,6 @@ func (m *UpdateMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMa
 	return m
 }
 
-// Params set params
-func (m *UpdateMapper) Params(params ...*Param) *UpdateMapper {
-	m.sql = replaceParams(m.originalSql, params...)
-	return m
-}
-
 // Args set args
 func (m *UpdateMapper) Args(args ...interface{}) *UpdateMapper {
 	m.args = args
@@ -83,22 +77,22 @@ func (m *UpdateMapper) Exec() error {
 		m.affectedRows = ra
 		m.insertedId = li
 	}
-	return nil
+	return err
 }
 
 func (m *UpdateMapper) updateByTx(tx *sql.Tx) (sql.Result, error) {
 	if m.args != nil && len(m.args) > 0 {
 		result, err := tx.Exec(m.sql, m.args...)
 		if err != nil {
-			m.logger.Panicf("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
+			m.logger.Errorf("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
 		}
-		return result, nil
+		return result, err
 	} else {
 		result, err := tx.Exec(m.sql)
 		if err != nil {
-			m.logger.Panicf("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
+			m.logger.Errorf("binding[%s] update[%s] updateByTx error : %v", m.binding, m.id, err)
 		}
-		return result, nil
+		return result, err
 	}
 }
 
@@ -106,14 +100,14 @@ func (m *UpdateMapper) updateByDB() (sql.Result, error) {
 	if m.args != nil && len(m.args) > 0 {
 		result, err := m.db.db.Exec(m.sql, m.args...)
 		if err != nil {
-			m.logger.Panicf("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
+			m.logger.Errorf("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
 		}
-		return result, nil
+		return result, err
 	} else {
 		result, err := m.db.db.Exec(m.sql)
 		if err != nil {
-			m.logger.Panicf("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
+			m.logger.Errorf("binding[%s] update[%s] updateByDB error : %v", m.binding, m.id, err)
 		}
-		return result, nil
+		return result, err
 	}
 }

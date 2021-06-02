@@ -50,12 +50,6 @@ func (m *SelectMapper) Args(args ...interface{}) *SelectMapper {
 	return m
 }
 
-// Params set params
-func (m *SelectMapper) Params(params ...*Param) *SelectMapper {
-	m.sql = replaceParams(m.originalSql, params...)
-	return m
-}
-
 // Exec select exec
 func (m *SelectMapper) Exec() *selectCall {
 	var rows *sql.Rows
@@ -77,16 +71,16 @@ func (m *SelectMapper) Exec() *selectCall {
 
 func (m *SelectMapper) queryCountByDB() int {
 	rx := regexp.MustCompile(`^\s*[Ss][Ee][Ll][Ee][Cc][Tt]([\s\S]+)[Ff][Rr][Oo][Mm]`)
-	csql := rx.ReplaceAllString(m.sql, " select count(*) from ")
+	_sql := rx.ReplaceAllString(m.sql, " select count(*) from ")
 	var rows *sql.Rows
 	var err error
 	if m.printSql {
-		m.logger.Infof("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, csql, m.args)
+		m.logger.Infof("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, _sql, m.args)
 	}
 	if m.args != nil && len(m.args) > 0 {
-		rows, err = m.db.db.Query(csql, m.args...)
+		rows, err = m.db.db.Query(_sql, m.args...)
 	} else {
-		rows, err = m.db.db.Query(csql)
+		rows, err = m.db.db.Query(_sql)
 	}
 	if err != nil {
 		m.logger.Panicf("binding[%s] select[%s] queryCountByDB error : %v", m.binding, m.id, err)
@@ -105,13 +99,13 @@ func (m *SelectMapper) queryByDB() (*sql.Rows, error) {
 	if m.args != nil && len(m.args) > 0 {
 		rows, err := m.db.db.Query(m.sql+m.extraSql, m.args...)
 		if err != nil {
-			m.logger.Panicf("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
+			m.logger.Errorf("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
 		}
 		return rows, err
 	} else {
 		rows, err := m.db.db.Query(m.sql + m.extraSql)
 		if err != nil {
-			m.logger.Panicf("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
+			m.logger.Errorf("binding[%s] select[%s] queryByDB error : %v", m.binding, m.id, err)
 		}
 		return rows, err
 	}

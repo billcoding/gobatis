@@ -113,7 +113,7 @@ func (c *selectCall) scanStruct() []interface{} {
 	rt := reflect.TypeOf(c.rptr).Elem()
 	//get the struct field name map
 	fieldMap := c.getFieldMap()
-	//get rows's columns
+	//get rows columns
 	columns, _ := c.rows.Columns()
 	//make return slice
 	list := make([]interface{}, 0)
@@ -162,17 +162,17 @@ func (c *selectCall) scanMap() []map[string]interface{} {
 	}()
 	for c.rows.Next() {
 		m := make(map[string]interface{}, 0)
-		addrs := make([]interface{}, len(columns))
+		addresses := make([]interface{}, len(columns))
 		for i := range columns {
 			var obj string
-			addrs[i] = &obj
+			addresses[i] = &obj
 		}
-		err := c.rows.Scan(addrs...)
+		err := c.rows.Scan(addresses...)
 		if err != nil {
 			c.logger.Panicf("%v", err)
 		}
 		for i, column := range columns {
-			m[column] = getInterfaceVal(*(addrs[i].(*string)))
+			m[column] = getInterfaceVal(*(addresses[i].(*string)))
 		}
 		list = append(list, m)
 	}
@@ -182,15 +182,15 @@ func (c *selectCall) scanMap() []map[string]interface{} {
 // TODO supports more types
 func getInterfaceVal(val string) interface{} {
 	// int64
-	ival, err := strconv.ParseInt(val, 10, 64)
+	intVal, err := strconv.ParseInt(val, 10, 64)
 	if err == nil {
-		return ival
+		return intVal
 	}
 
 	// float64
-	fval, err := strconv.ParseFloat(val, 64)
+	floatVal, err := strconv.ParseFloat(val, 64)
 	if err == nil {
-		return fval
+		return floatVal
 	}
 
 	return val
