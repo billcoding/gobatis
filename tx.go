@@ -24,23 +24,26 @@ func (b *Batis) Begin() *TX {
 	}
 }
 
-func (tx *TX) Update(m *UpdateMapper) {
+func (tx *TX) Update(m *UpdateMapper) error {
 	result, err := m.updateByTx(tx.tx)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	m.insertedId, _ = result.LastInsertId()
 	m.affectedRows, _ = result.RowsAffected()
+	return nil
 }
 
-func (tx *TX) Commit() {
+func (tx *TX) Commit() error {
 	if err := tx.tx.Commit(); err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
-func (tx *TX) Rollback() {
+func (tx *TX) Rollback() error {
 	if err := tx.tx.Rollback(); err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
