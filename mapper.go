@@ -82,6 +82,8 @@ func copySelectMapper(dst, src *SelectMapper) {
 	dst.id = src.id
 	dst.originalSql = src.originalSql
 	dst.sql = src.sql
+	// Fixed mutex copy
+	dst.mu = src.mu
 }
 
 func copyUpdateMapper(dst, src *UpdateMapper) {
@@ -92,4 +94,6 @@ func copyUpdateMapper(dst, src *UpdateMapper) {
 	dst.id = src.id
 	dst.originalSql = src.originalSql
 	dst.sql = src.sql
+	// Fixed mutex copy
+	dst.mu = src.mu
 }
