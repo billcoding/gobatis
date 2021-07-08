@@ -18,7 +18,7 @@ func (b *Batis) AddFS(FS *embed.FS, name string) *Batis {
 	}
 	_, have := b.mappers[node.Binding]
 	if have {
-		b.Logger.Panicf("[FS]AddFS binding[%v] fail: duplicated", node.Binding)
+		b.Logger.Panicf("FS: AddFS binding[%v] fail: duplicated", node.Binding)
 	}
 	b.mappers[node.Binding] = &mapper{
 		logger:        b.Logger,
@@ -27,6 +27,6 @@ func (b *Batis) AddFS(FS *embed.FS, name string) *Batis {
 		selectMappers: b.prepareSelectMappers(node.Binding, node.MapperSelectNodes),
 		updateMappers: b.prepareUpdateMappers(node.Binding, node.MapperUpdateNodes),
 	}
-	b.Logger.Infof("[FS]AddFS binding[%v] success", node.Binding)
+	b.Logger.Debugf("FS: AddFS binding[%v] success", node.Binding)
 	return b
 }

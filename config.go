@@ -2,30 +2,22 @@ package gobatis
 
 import "time"
 
-// Config struct
-type Config struct {
-	// AutoScan field
-	AutoScan bool
-	// PrintSql field
-	PrintSql bool
-	// MapperPaths field
-	MapperPaths []string
+func (b *Batis) SetMaxOpenConn(n int) *Batis {
+	b.MultiDS.maxOpenConn = n
+	return b
 }
 
-// DBConfig struct
-type DBConfig struct {
-	// MaxOpenConns field
-	MaxOpenConns int
-	// MaxIdleConns field
-	MaxIdleConns int
-	// ConnMaxLifetime field
-	ConnMaxLifetime time.Duration
-	// ConnMaxIdleTime field
-	ConnMaxIdleTime time.Duration
+func (b *Batis) SetMaxIdleConn(n int) *Batis {
+	b.MultiDS.maxIdleConn = n
+	return b
 }
 
-// DBConfig config
-func (b *Batis) DBConfig(config *DBConfig) *Batis {
-	b.MultiDS.config = config
+func (b *Batis) SetConnMaxIdleTime(n time.Duration) *Batis {
+	b.MultiDS.connMaxIdleTime = n
+	return b
+}
+
+func (b *Batis) SetConnMaxLifetime(n time.Duration) *Batis {
+	b.MultiDS.connMaxLifetime = n
 	return b
 }

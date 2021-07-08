@@ -1,5 +1,7 @@
 package gobatis
 
+import "sync"
+
 func (b *Batis) prepareMappers() {
 	for binding, node := range b.mapperNodes {
 		updateMappers := b.prepareUpdateMappers(binding, node.MapperUpdateNodes)
@@ -24,12 +26,12 @@ func (b *Batis) prepareUpdateMappers(binding string, mapperUpdateNodes []mapperU
 			id := node.Id
 			sql := node.Text
 			if sql == "" {
-				b.Logger.Warnf("[Mapper]node sql is empty : %v", id)
+				b.Logger.Warnf("mapper: node[%v] sql is empty", id)
 				continue
 			}
 			updateMapperMap[id] = &UpdateMapper{
+				mu:          &sync.Mutex{},
 				funcMap:     &b.FuncMap,
-				printSql:    b.PrintSql,
 				logger:      b.Logger,
 				binding:     binding,
 				id:          id,
@@ -48,13 +50,13 @@ func (b *Batis) prepareSelectMappers(binding string, mapperSelectNodes []mapperS
 			id := node.Id
 			sql := node.Text
 			if sql == "" {
-				b.Logger.Warnf("[Mapper]node sql is empty : %v", id)
+				b.Logger.Warnf("mapper: node[%v] sql is empty", id)
 				continue
 			}
 			selectMapperMap[id] = &SelectMapper{
+				mu:          &sync.Mutex{},
 				funcMap:     &b.FuncMap,
 				logger:      b.Logger,
-				printSql:    b.PrintSql,
 				binding:     binding,
 				id:          id,
 				originalSql: sql,

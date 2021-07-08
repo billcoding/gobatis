@@ -3,6 +3,7 @@ package gobatis
 import (
 	"github.com/sirupsen/logrus"
 	"text/template"
+	"time"
 )
 
 var batis *Batis
@@ -14,7 +15,6 @@ type Batis struct {
 	Logger      *logrus.Logger
 	MultiDS     *multiDS
 	FuncMap     template.FuncMap
-	PrintSql    bool
 }
 
 func newBatis() *Batis {
@@ -23,11 +23,13 @@ func newBatis() *Batis {
 		mapperNodes: make(map[string]*mapperNode, 0),
 		Logger:      logrus.StandardLogger(),
 		MultiDS: &multiDS{
-			mds:    make(map[string]*DS, 0),
-			config: &DBConfig{},
+			mds:             make(map[string]*DS, 0),
+			maxOpenConn:     10,
+			maxIdleConn:     2,
+			connMaxLifetime: 0,
+			connMaxIdleTime: time.Minute * 2,
 		},
-		FuncMap:  make(map[string]interface{}, 0),
-		PrintSql: false,
+		FuncMap: make(map[string]interface{}, 0),
 	}
 }
 
@@ -54,10 +56,9 @@ func New() *Batis {
 func (b *Batis) Mapper(binding string) *mapper {
 	mp, have := b.mappers[binding]
 	if !have {
-		b.Logger.Panicf("[Mapper]no binding : %v", binding)
+		b.Logger.Panicf("mapper: no binding [%v]", binding)
 	}
 	_, mds := b.MultiDS.defaultDS()
 	mp.currentDS = mds
-	mp.printSql = b.PrintSql
 	return mp
 }

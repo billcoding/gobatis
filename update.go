@@ -4,12 +4,13 @@ import (
 	"database/sql"
 	"github.com/sirupsen/logrus"
 	"strings"
+	"sync"
 	"text/template"
 )
 
 type UpdateMapper struct {
+	mu           *sync.Mutex
 	funcMap      *template.FuncMap
-	printSql     bool
 	logger       *logrus.Logger
 	binding      string
 	id           string
@@ -62,12 +63,12 @@ func (m *UpdateMapper) Args(args ...interface{}) *UpdateMapper {
 
 // Exec update exec
 func (m *UpdateMapper) Exec() error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	var result sql.Result
 	var err error
 	result, err = m.updateByDB()
-	if m.printSql {
-		m.logger.Infof("[SQL]binding[%s] update[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, m.args)
-	}
+	m.logger.Debugf("SQL: binding[%s] update[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, m.args)
 	if err != nil {
 		return err
 	}

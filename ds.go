@@ -2,12 +2,15 @@ package gobatis
 
 import (
 	"database/sql"
-	"fmt"
+	"time"
 )
 
 type multiDS struct {
-	mds    map[string]*DS
-	config *DBConfig
+	mds             map[string]*DS
+	maxOpenConn     int
+	maxIdleConn     int
+	connMaxLifetime time.Duration
+	connMaxIdleTime time.Duration
 }
 
 // DS struct
@@ -23,10 +26,10 @@ type DS struct {
 func (m *mapper) DS(ds string) *mapper {
 	mds, have := m.multiDS.mds[ds]
 	if !have {
-		m.logger.Panicf(fmt.Sprintf("[Mapper]Choose DS[%s] fail: not registered", ds))
+		m.logger.Panicf("mapper: choose DS[%s] not registered", ds)
 	}
 	m.currentDS = mds
-	m.logger.Infof("[Mapper]Choose DS[%s]", ds)
+	m.logger.Debugf("mapper: choose DS[%s]", ds)
 	return m
 }
 
@@ -46,11 +49,11 @@ func (m *multiDS) AddWithDialect(name, dsn string, dialect Dialect) *DS {
 	if err != nil {
 		panic(err)
 	}
-	if m.config != nil {
-		db.SetMaxOpenConns(m.config.MaxOpenConns)
-		db.SetMaxIdleConns(m.config.MaxIdleConns)
-		db.SetConnMaxLifetime(m.config.ConnMaxLifetime)
-		db.SetConnMaxIdleTime(m.config.ConnMaxIdleTime)
+	{
+		db.SetMaxOpenConns(m.maxOpenConn)
+		db.SetMaxIdleConns(m.maxIdleConn)
+		db.SetConnMaxLifetime(m.connMaxLifetime)
+		db.SetConnMaxIdleTime(m.connMaxIdleTime)
 	}
 	ds := &DS{
 		Name: name,
@@ -65,7 +68,7 @@ func (m *multiDS) AddWithDialect(name, dsn string, dialect Dialect) *DS {
 
 func (m *multiDS) defaultDS() (string, *DS) {
 	if len(m.mds) <= 0 {
-		panic("[MultiDS]MultiDS is empty")
+		panic("MultiDS: MultiDS is empty")
 	}
 	mds, have := m.mds["master"]
 	if have {

@@ -13,7 +13,7 @@ type selectCall struct {
 	logger *logrus.Logger
 	err    error
 	rows   *sql.Rows
-	rptr   interface{}
+	ptr    interface{}
 }
 
 // Scan rows to dest
@@ -78,7 +78,7 @@ func (c *selectCall) SingleString() string {
 
 // List get list rows
 func (c *selectCall) List(ptr interface{}) []interface{} {
-	c.rptr = ptr
+	c.ptr = ptr
 	return c.scanStruct()
 }
 
@@ -105,12 +105,12 @@ func (c *selectCall) Call(callback func(rows *sql.Rows)) {
 
 func (c *selectCall) scanStruct() []interface{} {
 	//must be kind of Ptr
-	if reflect.TypeOf(c.rptr).Kind() != reflect.Ptr {
-		c.logger.Panicf("structPtr must be the kind of reflect.Ptr")
+	if reflect.TypeOf(c.ptr).Kind() != reflect.Ptr {
+		c.logger.Panicf("scanStruct: structPtr must be the kind of reflect.Ptr")
 	}
 
 	//receive the struct type
-	rt := reflect.TypeOf(c.rptr).Elem()
+	rt := reflect.TypeOf(c.ptr).Elem()
 	//get the struct field name map
 	fieldMap := c.getFieldMap()
 	//get rows columns
@@ -125,6 +125,7 @@ func (c *selectCall) scanStruct() []interface{} {
 			c.logger.Panicf("%v", err)
 		}
 	}()
+
 	for c.rows.Next() {
 		//make struct field num length slice
 		fieldAdds := make([]interface{}, len(columns))
@@ -197,7 +198,7 @@ func getInterfaceVal(val string) interface{} {
 }
 
 func (c *selectCall) getFieldMap() map[string]string {
-	reflectType := reflect.TypeOf(c.rptr).Elem()
+	reflectType := reflect.TypeOf(c.ptr).Elem()
 	fieldNum := reflectType.NumField()
 	fieldMap := make(map[string]string, 0)
 	for i := 0; i < fieldNum; i++ {

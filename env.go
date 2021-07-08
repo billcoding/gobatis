@@ -6,28 +6,19 @@ import (
 )
 
 const (
-	batisPrintSql = "BATIS_PRINT_SQL" //batis print sql
-	batisDsn      = "BATIS_DSN"       //batis dsn
+	envBatisDSN = "BATIS_DSN"
 )
 
 func (b *Batis) parseEnv() *Batis {
-	printSql := os.Getenv(batisPrintSql)
-	if printSql != "" {
-		ss := strings.ToUpper(printSql)
-		if ss == "ON" || ss == "TRUE" || ss == "1" {
-			b.PrintSql = true
-		}
-	}
-	batisDsn := os.Getenv(batisDsn)
-	if batisDsn != "" {
+	if batisDSN := os.Getenv(envBatisDSN); batisDSN != "" {
 		//NAME1,DSN1|NAME2,DSN2
-		dsns := strings.Split(batisDsn, "|")
-		if len(dsns) > 0 {
-			if len(dsns) == 1 && !strings.Contains(dsns[0], ",") {
+		dsnS := strings.Split(batisDSN, "|")
+		if len(dsnS) > 0 {
+			if len(dsnS) == 1 && !strings.Contains(dsnS[0], ",") {
 				//only one
-				b.MultiDS.Add("master", dsns[0])
+				b.MultiDS.Add("master", dsnS[0])
 			} else {
-				for _, dsnStr := range dsns {
+				for _, dsnStr := range dsnS {
 					dsnArray := strings.Split(dsnStr, ",")
 					name := "_"
 					dsn := ""

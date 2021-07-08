@@ -5,13 +5,14 @@ import (
 	"github.com/sirupsen/logrus"
 	"regexp"
 	"strings"
+	"sync"
 	"text/template"
 )
 
 type SelectMapper struct {
+	mu          *sync.Mutex
 	funcMap     *template.FuncMap
 	logger      *logrus.Logger
-	printSql    bool
 	binding     string
 	id          string
 	db          *DB
@@ -29,11 +30,11 @@ func (m *SelectMapper) Prepare(data interface{}) *SelectMapper {
 // PrepareWithFunc using text/template with func
 func (m *SelectMapper) PrepareWithFunc(data interface{}, funcMap template.FuncMap) *SelectMapper {
 	var t *template.Template
-	gfuncMap := joinFuncMap(*m.funcMap, funcMap)
-	if len(gfuncMap) <= 0 {
+	funcMap = joinFuncMap(*m.funcMap, funcMap)
+	if len(funcMap) <= 0 {
 		t = template.Must(template.New("").Parse(m.originalSql))
 	} else {
-		t = template.Must(template.New("").Funcs(gfuncMap).Parse(m.originalSql))
+		t = template.Must(template.New("").Funcs(funcMap).Parse(m.originalSql))
 	}
 	var builder strings.Builder
 	err := t.Execute(&builder, data)
@@ -52,11 +53,11 @@ func (m *SelectMapper) Args(args ...interface{}) *SelectMapper {
 
 // Exec select exec
 func (m *SelectMapper) Exec() *selectCall {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	var rows *sql.Rows
 	var err error
-	if m.printSql {
-		m.logger.Infof("binding[%s] select[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql+m.extraSql, m.args)
-	}
+	m.logger.Debugf("binding[%s] select[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql+m.extraSql, m.args)
 	rows, err = m.queryByDB()
 	if err != nil {
 		return &selectCall{err: err}
@@ -74,9 +75,7 @@ func (m *SelectMapper) queryCountByDB() int {
 	_sql := rx.ReplaceAllString(m.sql, " select count(*) from ")
 	var rows *sql.Rows
 	var err error
-	if m.printSql {
-		m.logger.Infof("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, _sql, m.args)
-	}
+	m.logger.Debugf("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, _sql, m.args)
 	if m.args != nil && len(m.args) > 0 {
 		rows, err = m.db.db.Query(_sql, m.args...)
 	} else {

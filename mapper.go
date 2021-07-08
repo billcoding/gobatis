@@ -2,11 +2,7 @@ package gobatis
 
 import (
 	"github.com/sirupsen/logrus"
-	"sync"
 )
-
-var mutex1 = &sync.Mutex{}
-var mutex2 = &sync.Mutex{}
 
 type mapper struct {
 	logger        *logrus.Logger
@@ -26,8 +22,6 @@ func (m *mapper) Select(id string) *SelectMapper {
 
 // SelectWithDS select mapper with ds
 func (m *mapper) SelectWithDS(id, ds string) *SelectMapper {
-	defer mutex1.Unlock()
-	mutex1.Lock()
 	selectMapper, have := m.selectMappers[id]
 	if !have {
 		m.logger.Panicf("no select node : %v", id)
@@ -37,14 +31,14 @@ func (m *mapper) SelectWithDS(id, ds string) *SelectMapper {
 	if ds == "" {
 		//set default db
 		dsName, db := m.multiDS.defaultDS()
-		m.logger.Infof("[MultiDS]Choose DS[%s]", dsName)
+		m.logger.Debugf("MultiDS: Choose DS[%s]", dsName)
 		cloneSM.db = db.db
 	} else {
 		mds, mdsHave := m.multiDS.mds[ds]
 		if !mdsHave {
-			m.logger.Panicf("[MultiDS] DS[%s] was not registered", ds)
+			m.logger.Panicf("MultiDS:  DS[%s] was not registered", ds)
 		}
-		m.logger.Infof("[MultiDS]Choose DS[%s]", ds)
+		m.logger.Debugf("MultiDS: Choose DS[%s]", ds)
 		cloneSM.db = mds.db
 	}
 	cloneSM.printSql = m.printSql
@@ -58,8 +52,6 @@ func (m *mapper) Update(id string) *UpdateMapper {
 
 // UpdateWithDS get update mapper with ds
 func (m *mapper) UpdateWithDS(id, ds string) *UpdateMapper {
-	defer mutex2.Unlock()
-	mutex2.Lock()
 	updateMapper, have := m.updateMappers[id]
 	if !have {
 		m.logger.Panicf("no update node : %v", id)
@@ -69,14 +61,14 @@ func (m *mapper) UpdateWithDS(id, ds string) *UpdateMapper {
 	if ds == "" {
 		//set default db
 		dsName, db := m.multiDS.defaultDS()
-		m.logger.Infof("[MultiDS]Choose DS[%s]", dsName)
+		m.logger.Debugf("MultiDS: Choose DS[%s]", dsName)
 		cloneUM.db = db.db
 	} else {
 		mds, mdsHave := m.multiDS.mds[ds]
 		if !mdsHave {
-			m.logger.Panicf("[MultiDS] DS[%s] was not registered", ds)
+			m.logger.Panicf("MultiDS:  DS[%s] was not registered", ds)
 		}
-		m.logger.Infof("[MultiDS]Choose DS[%s]", ds)
+		m.logger.Debugf("MultiDS: Choose DS[%s]", ds)
 		cloneUM.db = mds.db
 	}
 	cloneUM.printSql = m.printSql
