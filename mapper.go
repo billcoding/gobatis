@@ -41,7 +41,6 @@ func (m *mapper) SelectWithDS(id, ds string) *SelectMapper {
 		m.logger.Debugf("MultiDS: Choose DS[%s]", ds)
 		cloneSM.db = mds.db
 	}
-	cloneSM.printSql = m.printSql
 	return cloneSM
 }
 
@@ -71,7 +70,6 @@ func (m *mapper) UpdateWithDS(id, ds string) *UpdateMapper {
 		m.logger.Debugf("MultiDS: Choose DS[%s]", ds)
 		cloneUM.db = mds.db
 	}
-	cloneUM.printSql = m.printSql
 	return cloneUM
 }
 
@@ -84,7 +82,6 @@ func copySelectMapper(dst, src *SelectMapper) {
 	dst.id = src.id
 	dst.originalSql = src.originalSql
 	dst.sql = src.sql
-	dst.printSql = src.printSql
 }
 
 func copyUpdateMapper(dst, src *UpdateMapper) {
@@ -95,5 +92,4 @@ func copyUpdateMapper(dst, src *UpdateMapper) {
 	dst.id = src.id
 	dst.originalSql = src.originalSql
 	dst.sql = src.sql
-	dst.printSql = src.printSql
 }

@@ -18,9 +18,7 @@ func (m *SelectMapper) Page(rptr interface{}, offset, size int) *Page {
 		Size:   size,
 		List:   []interface{}{},
 	}
-	if m.printSql {
-		m.logger.Debugf("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, m.args)
-	}
+	m.logger.Debugf("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, m.args)
 	//First query total count
 	totalRows := m.queryCountByDB()
 	if totalRows > 0 && offset >= 0 && offset <= totalRows-1 {
@@ -47,9 +45,7 @@ func (m *SelectMapper) PageMap(offset, size int) *PageMap {
 		Size:   size,
 		List:   []map[string]interface{}{},
 	}
-	if m.printSql {
-		m.logger.Debugf("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, m.args)
-	}
+	m.logger.Debugf("binding[%s] selectPage[%s] exec : sql(%v), args(%v)", m.binding, m.id, m.sql, m.args)
 	//First query total count
 	totalRows := m.queryCountByDB()
 	if totalRows > 0 && offset >= 0 && offset <= totalRows-1 {
