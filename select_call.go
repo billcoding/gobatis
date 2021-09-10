@@ -16,8 +16,8 @@ type selectCall struct {
 	ptr    interface{}
 }
 
-// Scan rows to dest
-func (c *selectCall) Scan(dest ...interface{}) error {
+// Scan rows to dist
+func (c *selectCall) Scan(dist ...interface{}) error {
 	//fixed
 	//close rows
 	//release conn
@@ -28,7 +28,7 @@ func (c *selectCall) Scan(dest ...interface{}) error {
 		}
 	}()
 	if c.rows.Next() {
-		err := c.rows.Scan(dest...)
+		err := c.rows.Scan(dist...)
 		if err != nil {
 			c.logger.Panicf("%v", err)
 		}
@@ -36,8 +36,8 @@ func (c *selectCall) Scan(dest ...interface{}) error {
 	return c.rows.Err()
 }
 
-// Single return single record
-func (c *selectCall) Single() interface{} {
+// Interface return single record
+func (c *selectCall) Interface() interface{} {
 	var r interface{}
 	err := c.Scan(&r)
 	if err != nil {
@@ -46,8 +46,8 @@ func (c *selectCall) Single() interface{} {
 	return r
 }
 
-// SingleInt return single record
-func (c *selectCall) SingleInt() int64 {
+// Int return single record
+func (c *selectCall) Int() int64 {
 	var r int64
 	err := c.Scan(&r)
 	if err != nil {
@@ -56,8 +56,8 @@ func (c *selectCall) SingleInt() int64 {
 	return r
 }
 
-// SingleFloat return single record
-func (c *selectCall) SingleFloat() float64 {
+// Float return single record
+func (c *selectCall) Float() float64 {
 	var r float64
 	err := c.Scan(&r)
 	if err != nil {
@@ -66,8 +66,8 @@ func (c *selectCall) SingleFloat() float64 {
 	return r
 }
 
-// SingleString return single record
-func (c *selectCall) SingleString() string {
+// String return single record
+func (c *selectCall) String() string {
 	var r string
 	err := c.Scan(&r)
 	if err != nil {
