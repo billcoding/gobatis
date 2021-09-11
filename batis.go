@@ -21,7 +21,7 @@ func newBatis() *Batis {
 	return &Batis{
 		mappers:     make(map[string]*mapper, 0),
 		mapperNodes: make(map[string]*mapperNode, 0),
-		Logger:      logrus.StandardLogger(),
+		Logger:      logrus.New(),
 		MultiDS: &multiDS{
 			mds:             make(map[string]*DS, 0),
 			maxOpenConn:     10,
